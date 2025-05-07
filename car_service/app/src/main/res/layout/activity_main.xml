@@ -3,14 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:background="#FFFFFF"
+    tools:context=".MainActivity">
 
     <!-- Top App Bar -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#4285F4"
+        android:background="@color/blue_primary"
         android:paddingHorizontal="16dp"
         android:paddingVertical="10dp"
         app:layout_constraintTop_toTopOf="parent">
@@ -71,8 +74,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/searchBarContainer"
         android:layout_width="match_parent"
-        android:layout_height="110dp"
-        android:background="#4285F4"
+        android:layout_height="130dp"
+        android:background="@drawable/rounded_bottom_corners"
         android:paddingHorizontal="16dp"
         android:paddingVertical="20dp"
         app:layout_constraintTop_toBottomOf="@id/topBar">
@@ -121,7 +124,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingVertical="10dp"
-            android:text="Filters"
+            android:text="Search"
             android:textColor="@android:color/white"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="@id/searchBar"
@@ -135,17 +138,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
-        android:layout_marginTop="-20dp"
+        android:layout_marginTop="-40dp"
         app:layout_constraintTop_toBottomOf="@id/searchBarContainer">
 
         <!-- My Location Button -->
         <androidx.cardview.widget.CardView
             android:id="@+id/myLocationButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="184dp"
+            android:layout_height="70dp"
             android:layout_marginEnd="8dp"
             app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="24dp"
+            app:cardCornerRadius="20dp"
             app:cardElevation="5dp"
             app:layout_constraintEnd_toStartOf="@id/myVehiclesButton"
             app:layout_constraintStart_toStartOf="parent"
@@ -156,8 +159,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
+                android:layout_marginTop="12dp"
                 android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
+                android:paddingHorizontal="25dp"
                 android:paddingVertical="12dp">
 
                 <ImageView
@@ -188,10 +192,10 @@
         <!-- My Vehicles Button -->
         <androidx.cardview.widget.CardView
             android:id="@+id/myVehiclesButton"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="24dp"
+            app:cardCornerRadius="20dp"
             app:cardElevation="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/myLocationButton"
@@ -199,11 +203,11 @@
             app:layout_constraintWidth_percent="0.48">
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="184dp"
+                android:layout_height="70dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
+                android:paddingHorizontal="25dp"
                 android:paddingVertical="12dp">
 
                 <ImageView
@@ -282,9 +286,9 @@
                 android:layout_marginBottom="16dp">
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_width="30dp"
+                    android:layout_height="80dp"
+
                     android:layout_weight="1"
                     app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
@@ -298,8 +302,8 @@
                         android:orientation="vertical">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
                             android:src="@drawable/service_icon"
                             app:tint="#9BAFD9" />
 
@@ -309,14 +313,14 @@
                             android:layout_marginTop="4dp"
                             android:text="Service"
                             android:textColor="#9BAFD9"
-                            android:textSize="12sp" />
+                            android:textSize="9sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_marginHorizontal="8dp"
+                    android:layout_width="30dp"
+                    android:layout_height="80dp"
+
                     android:layout_weight="1"
                     app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
@@ -330,9 +334,9 @@
                         android:orientation="vertical">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_car_towing"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:src="@drawable/cartowing"
                             app:tint="#9BAFD9" />
 
                         <TextView
@@ -341,14 +345,14 @@
                             android:layout_marginTop="4dp"
                             android:text="Car Towing"
                             android:textColor="#9BAFD9"
-                            android:textSize="12sp" />
+                            android:textSize="9sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_marginHorizontal="8dp"
+                    android:layout_width="30dp"
+                    android:layout_height="80dp"
+
                     android:layout_weight="1"
                     app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
@@ -362,9 +366,9 @@
                         android:orientation="vertical">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_brake_service"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:src="@drawable/brakeservice"
                             app:tint="#9BAFD9" />
 
                         <TextView
@@ -373,14 +377,13 @@
                             android:layout_marginTop="4dp"
                             android:text="Brake Service"
                             android:textColor="#9BAFD9"
-                            android:textSize="12sp" />
+                            android:textSize="9sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_width="30dp"
+                    android:layout_height="80dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
@@ -394,9 +397,9 @@
                         android:orientation="vertical">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_car_wash"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:src="@drawable/carwash"
                             app:tint="#9BAFD9" />
 
                         <TextView
@@ -405,7 +408,7 @@
                             android:layout_marginTop="4dp"
                             android:text="Car Wash"
                             android:textColor="#9BAFD9"
-                            android:textSize="12sp" />
+                            android:textSize="9sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
@@ -418,9 +421,8 @@
                 android:layout_marginBottom="32dp">
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_width="30dp"
+                    android:layout_height="80dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
@@ -434,25 +436,24 @@
                         android:orientation="vertical">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_service_5"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:src="@drawable/fuelup"
                             app:tint="#9BAFD9" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="S5"
+                            android:text="Fuel up"
                             android:textColor="#9BAFD9"
-                            android:textSize="12sp" />
+                            android:textSize="9sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_marginHorizontal="8dp"
+                    android:layout_width="30dp"
+                    android:layout_height="80dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
@@ -466,25 +467,24 @@
                         android:orientation="vertical">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_service_6"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:src="@drawable/tyrechange"
                             app:tint="#9BAFD9" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="S6"
+                            android:text="Tire Change"
                             android:textColor="#9BAFD9"
-                            android:textSize="12sp" />
+                            android:textSize="9sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_marginHorizontal="8dp"
+                    android:layout_width="30dp"
+                    android:layout_height="80dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
@@ -498,25 +498,24 @@
                         android:orientation="vertical">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_service_7"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:src="@drawable/batterychange"
                             app:tint="#9BAFD9" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="S7"
+                            android:text="Battery change"
                             android:textColor="#9BAFD9"
-                            android:textSize="12sp" />
+                            android:textSize="9sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_width="30dp"
+                    android:layout_height="80dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
@@ -530,18 +529,18 @@
                         android:orientation="vertical">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_service_8"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:src="@drawable/servicecontract"
                             app:tint="#9BAFD9" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="S8"
+                            android:text="Servoce contract"
                             android:textColor="#9BAFD9"
-                            android:textSize="12sp" />
+                            android:textSize="9sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
@@ -561,93 +560,162 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_marginBottom="-20dp"
+                android:paddingBottom="16dp">
 
-                <!-- First Offer -->
+                <!-- First Offer (Oil Change) -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="0dp"
-                    android:layout_height="150dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="16dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="#F5F5F5"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="0dp">
+                    app:cardBackgroundColor="@android:color/white"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="2dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:padding="12dp">
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="#4285F4"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="4dp"
-                            android:text="20% OFF"
-                            android:textColor="@android:color/white"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="8dp"
-                            android:radius="16dp" />
-
-                        <View
+                        <!-- Image container -->
+                        <FrameLayout
                             android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="1" />
+                            android:layout_height="120dp">
 
+                            <!-- Image background -->
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/oil"
+                                android:contentDescription="Oil change service" />
+
+                            <!-- Discount circle -->
+                            <androidx.cardview.widget.CardView
+                                android:layout_width="55dp"
+                                android:layout_height="45dp"
+                                android:layout_margin="16dp"
+                                app:cardBackgroundColor="#3D50DF"
+                                app:cardCornerRadius="15dp"
+                                app:cardElevation="5dp">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:gravity="center"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="10%"
+                                        android:textColor="@android:color/white"
+                                        android:textSize="13sp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="OFF"
+                                        android:textColor="@android:color/white"
+                                        android:textSize="13sp" />
+                                </LinearLayout>
+                            </androidx.cardview.widget.CardView>
+                        </FrameLayout>
+
+                        <!-- Text description -->
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="10% OFF on Oil Change"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:paddingTop="16dp"
+                            android:paddingBottom="24dp"
+                            android:gravity="center"
+                            android:text="10% OFF on oil change"
                             android:textColor="#333333"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
+                            android:textSize="13sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Second Offer -->
+                <!-- Second Offer (Car Wash) -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="0dp"
-                    android:layout_height="150dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:layout_marginBottom="16dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="#F5F5F5"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="0dp">
+                    app:cardBackgroundColor="@android:color/white"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="2dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:padding="12dp">
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="#4285F4"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="4dp"
-                            android:text="25% OFF"
-                            android:textColor="@android:color/white"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="8dp"
-                            android:radius="16dp" />
-
-                        <View
+                        <!-- Image container -->
+                        <FrameLayout
                             android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="1" />
+                            android:layout_height="120dp">
 
+                            <!-- Image background -->
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/wash"
+                                android:contentDescription="Car wash service" />
+
+                            <!-- Discount circle -->
+                            <androidx.cardview.widget.CardView
+                                android:layout_width="55dp"
+                                android:layout_height="45dp"
+                                android:layout_margin="16dp"
+                                app:cardBackgroundColor="#3D50DF"
+                                app:cardCornerRadius="15dp"
+                                app:cardElevation="5dp">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:gravity="center"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="5%"
+                                        android:textColor="@android:color/white"
+                                        android:textSize="13sp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="OFF"
+                                        android:textColor="@android:color/white"
+                                        android:textSize="13sp" />
+                                </LinearLayout>
+                            </androidx.cardview.widget.CardView>
+                        </FrameLayout>
+
+                        <!-- Text description -->
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="25% OFF on Car wash"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:paddingTop="16dp"
+                            android:paddingBottom="24dp"
+                            android:minHeight="48dp"
+                            android:gravity="center"
+                            android:text="5% OFF on car wash"
                             android:textColor="#333333"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
+                            android:textSize="13sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
