@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:background="@color/blue_primary"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="10dp"
+        android:paddingVertical="15dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
@@ -136,7 +136,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/optionsContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="80dp"
         android:paddingHorizontal="5dp"
         android:layout_marginTop="-40dp"
         app:layout_constraintTop_toBottomOf="@id/searchBarContainer">
@@ -234,27 +234,14 @@
                     app:tint="#767676" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
-        <!-- Services Button -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/servicesButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="1dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/myLocationButton">
-
-        </androidx.cardview.widget.CardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Main Content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@android:color/white"
+        android:background="#00FFFFFF"
+        android:layout_marginTop="10dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
         app:layout_constraintTop_toBottomOf="@id/optionsContainer">
@@ -286,9 +273,9 @@
                 android:layout_marginBottom="16dp">
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/serviceCard1"
                     android:layout_width="30dp"
                     android:layout_height="80dp"
-
                     android:layout_weight="1"
                     app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
@@ -318,9 +305,9 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/serviceCard2"
                     android:layout_width="30dp"
                     android:layout_height="80dp"
-
                     android:layout_weight="1"
                     app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
@@ -350,9 +337,9 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/serviceCard3"
                     android:layout_width="30dp"
                     android:layout_height="80dp"
-
                     android:layout_weight="1"
                     app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
@@ -382,6 +369,7 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/serviceCard4"
                     android:layout_width="30dp"
                     android:layout_height="80dp"
                     android:layout_weight="1"
@@ -421,6 +409,7 @@
                 android:layout_marginBottom="32dp">
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/serviceCard5"
                     android:layout_width="30dp"
                     android:layout_height="80dp"
                     android:layout_weight="1"
@@ -452,6 +441,7 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/serviceCard6"
                     android:layout_width="30dp"
                     android:layout_height="80dp"
                     android:layout_weight="1"
@@ -483,6 +473,7 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/serviceCard7"
                     android:layout_width="30dp"
                     android:layout_height="80dp"
                     android:layout_weight="1"
@@ -514,6 +505,7 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/serviceCard8"
                     android:layout_width="30dp"
                     android:layout_height="80dp"
                     android:layout_weight="1"
@@ -538,7 +530,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Servoce contract"
+                            android:text="Service contract"
                             android:textColor="#7395C3"
                             android:textSize="9sp" />
                     </LinearLayout>
@@ -566,6 +558,7 @@
 
                 <!-- First Offer (Oil Change) -->
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/oilChangeOffer"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
@@ -643,6 +636,7 @@
 
                 <!-- Second Offer (Car Wash) -->
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/carWashOffer"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
@@ -735,6 +729,7 @@
 
         <!-- Home -->
         <LinearLayout
+            android:id="@+id/homeNavItem"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -759,6 +754,7 @@
 
         <!-- Search -->
         <LinearLayout
+            android:id="@+id/searchNavItem"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -780,7 +776,6 @@
                 android:textColor="#9E9E9E"
                 android:textSize="12sp" />
         </LinearLayout>
-
         <!-- Action Button -->
         <FrameLayout
             android:layout_width="0dp"
@@ -788,11 +783,12 @@
             android:layout_weight="1">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/actionButton"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="8dp"
-                android:contentDescription="Main Action"
+                android:contentDescription="New Request"
                 android:src="@drawable/ic_add"
                 app:backgroundTint="#4285F4"
                 app:elevation="4dp"
@@ -801,6 +797,7 @@
 
         <!-- Location -->
         <LinearLayout
+            android:id="@+id/locationNavItem"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -825,6 +822,7 @@
 
         <!-- Profile -->
         <LinearLayout
+            android:id="@+id/profileNavItem"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

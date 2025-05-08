@@ -1,20 +1,149 @@
 package com.example.car_service
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.view.View
+import android.widget.ImageButton
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.cardview.widget.CardView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        setupNavigation()
+        setupSearchBar()
+        setupLocationAndVehicles()
+        setupServiceCards()
+        setupSpecialOffers()
+    }
+
+    private fun setupNavigation() {
+        // Top navigation
+        findViewById<ImageButton>(R.id.menuButton).setOnClickListener {
+            Toast.makeText(this, "Menu clicked", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<ImageButton>(R.id.notificationButton).setOnClickListener {
+            Toast.makeText(this, "Notifications clicked", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<TextView>(R.id.locationTitle).setOnClickListener {
+            Toast.makeText(this, "Location clicked", Toast.LENGTH_SHORT).show()
+        }
+
+        // Bottom navigation
+        setupBottomNavigation()
+    }
+
+    private fun setupBottomNavigation() {
+        val homeNav = findViewById<View>(R.id.homeNavItem)
+        val searchNav = findViewById<View>(R.id.searchNavItem)
+        val locationNav = findViewById<View>(R.id.locationNavItem)
+        val profileNav = findViewById<View>(R.id.profileNavItem)
+        val actionButton = findViewById<FloatingActionButton>(R.id.actionButton)
+
+        homeNav.setOnClickListener {
+            // Already on home screen
+            Toast.makeText(this, "Home clicked", Toast.LENGTH_SHORT).show()
+        }
+
+        searchNav.setOnClickListener {
+            Toast.makeText(this, "Search clicked", Toast.LENGTH_SHORT).show()
+            // Navigate to search screen
+        }
+
+        locationNav.setOnClickListener {
+            Toast.makeText(this, "Location clicked", Toast.LENGTH_SHORT).show()
+            // Navigate to location screen
+        }
+
+        profileNav.setOnClickListener {
+            Toast.makeText(this, "Profile clicked", Toast.LENGTH_SHORT).show()
+            // Navigate to profile screen
+        }
+
+        actionButton.setOnClickListener {
+            Toast.makeText(this, "New Request", Toast.LENGTH_SHORT).show()
+            // Open new service request dialog/screen
+        }
+    }
+
+    private fun setupSearchBar() {
+        val searchBar = findViewById<CardView>(R.id.searchBar)
+        val filtersButton = findViewById<TextView>(R.id.filtersButton)
+
+        searchBar.setOnClickListener {
+            Toast.makeText(this, "Search bar clicked", Toast.LENGTH_SHORT).show()
+            // Open search screen or show keyboard
+        }
+
+        filtersButton.setOnClickListener {
+            Toast.makeText(this, "Search button clicked", Toast.LENGTH_SHORT).show()
+            // Start search with current filters
+        }
+    }
+
+    private fun setupLocationAndVehicles() {
+        val locationButton = findViewById<CardView>(R.id.myLocationButton)
+        val vehiclesButton = findViewById<CardView>(R.id.myVehiclesButton)
+
+        locationButton.setOnClickListener {
+            Toast.makeText(this, "My location clicked", Toast.LENGTH_SHORT).show()
+            // Show location selector dialog
+        }
+
+        vehiclesButton.setOnClickListener {
+            Toast.makeText(this, "My vehicles clicked", Toast.LENGTH_SHORT).show()
+            // Show vehicles selector dialog
+        }
+    }
+
+    private fun setupServiceCards() {
+        // Get all service cards
+        val serviceCards = listOf(
+            findViewById<CardView>(R.id.serviceCard1),
+            findViewById<CardView>(R.id.serviceCard2),
+            findViewById<CardView>(R.id.serviceCard3),
+            findViewById<CardView>(R.id.serviceCard4),
+            findViewById<CardView>(R.id.serviceCard5),
+            findViewById<CardView>(R.id.serviceCard6),
+            findViewById<CardView>(R.id.serviceCard7),
+            findViewById<CardView>(R.id.serviceCard8)
+        )
+
+        // Service types corresponding to the cards
+        val serviceTypes = listOf(
+            "Service", "Car Towing", "Brake Service", "Car Wash",
+            "Fuel Up", "Tire Change", "Battery Change", "Service Contract"
+        )
+
+        // Set click listeners for each service card
+        serviceCards.forEachIndexed { index, cardView ->
+            cardView.setOnClickListener {
+                val serviceName = serviceTypes[index]
+                Toast.makeText(this, "$serviceName clicked", Toast.LENGTH_SHORT).show()
+                // Open detail screen for the selected service
+            }
+        }
+    }
+
+    private fun setupSpecialOffers() {
+        val oilChangeOffer = findViewById<CardView>(R.id.oilChangeOffer)
+        val carWashOffer = findViewById<CardView>(R.id.carWashOffer)
+
+        oilChangeOffer.setOnClickListener {
+            Toast.makeText(this, "Oil change offer clicked", Toast.LENGTH_SHORT).show()
+            // Open oil change offer details
+        }
+
+        carWashOffer.setOnClickListener {
+            Toast.makeText(this, "Car wash offer clicked", Toast.LENGTH_SHORT).show()
+            // Open car wash offer details
         }
     }
 }
