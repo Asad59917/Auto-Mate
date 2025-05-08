@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"> <!-- Added black background to match reference -->
+    android:background="@color/white"
+    android:id="@+id/service"
+    tools:context=".Servicepage">
 
     <!-- Fixed Image at the Top (no rounded corners on the image itself) -->
     <ImageView
@@ -58,7 +60,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="160dp"
-        app:cardCornerRadius="20dp"
+        app:cardCornerRadius="40dp"
         app:cardElevation="0dp"
         app:cardBackgroundColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -272,23 +274,23 @@
                 android:layout_height="wrap_content"
                 android:padding="16dp"
                 android:background="#005662F6"
-                android:elevation="0dp"
+                android:elevation="10dp"
                 app:layout_constraintBottom_toBottomOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp">
+                    android:layout_height="67dp">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnBookNow"
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_width="310dp"
+                        android:layout_height="67dp"
                         android:backgroundTint="@color/blue"
-                        android:text="Get assistance"
+                        android:text="Book now"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
                         android:textSize="16sp"
-                        app:cornerRadius="28dp"
+                        app:cornerRadius="16dp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -298,7 +300,7 @@
                     <FrameLayout
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:layout_marginEnd="8dp"
+                        android:layout_marginEnd="15dp"
                         android:background="@drawable/circle_light_blue_bg"
                         app:layout_constraintEnd_toEndOf="@+id/btnBookNow"
                         app:layout_constraintTop_toTopOf="@+id/btnBookNow"
