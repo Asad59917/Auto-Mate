@@ -13,6 +13,27 @@
         android:theme="@style/Theme.Car_service"
         tools:targetApi="31">
         <activity
+            android:name=".SignIn"
+            android:exported="false" />
+        <activity
+            android:name=".ServiceContractPage"
+            android:exported="false" />
+        <activity
+            android:name=".BatteryChangeServicePage"
+            android:exported="false" />
+        <activity
+            android:name=".TireChangeServicePage"
+            android:exported="false" />
+        <activity
+            android:name=".CarWashServicePage"
+            android:exported="false" />
+        <activity
+            android:name=".BrakeService"
+            android:exported="false" />
+        <activity
+            android:name=".cartowing"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="false" />
         <activity
