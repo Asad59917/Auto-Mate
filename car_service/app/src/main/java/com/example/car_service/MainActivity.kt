@@ -1,5 +1,6 @@
 package com.example.car_service
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -11,10 +12,23 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var prefsHelper: PrefsHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Initialize SharedPreferences helper
+        prefsHelper = PrefsHelper(this)
+
+        // Check if user is logged in, if not redirect to SignInActivity
+        if (!prefsHelper.isLoggedIn()) {
+            startActivity(Intent(this, SignInActivity::class.java))
+            finish()
+            return
+        }
+
+        // Original setup functions
         setupNavigation()
         setupSearchBar()
         setupLocationAndVehicles()
@@ -63,14 +77,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         profileNav.setOnClickListener {
-            Toast.makeText(this, "Profile clicked", Toast.LENGTH_SHORT).show()
-            // Navigate to profile screen
+            // Modified to handle logout
+            showLogoutConfirmation()
         }
 
         actionButton.setOnClickListener {
             Toast.makeText(this, "New Request", Toast.LENGTH_SHORT).show()
             // Open new service request dialog/screen
         }
+    }
+
+    private fun showLogoutConfirmation() {
+        Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show()
+        prefsHelper.clearUser()
+        startActivity(Intent(this, SignInActivity::class.java))
+        finish()
     }
 
     private fun setupSearchBar() {
@@ -128,8 +149,24 @@ class MainActivity : AppCompatActivity() {
                 val serviceName = serviceTypes[index]
                 Toast.makeText(this, "$serviceName clicked", Toast.LENGTH_SHORT).show()
                 // Open detail screen for the selected service
+                navigateToService(serviceName)
             }
         }
+    }
+
+    private fun navigateToService(serviceName: String) {
+        val intent = when (serviceName) {
+            "Service" -> Intent(this, Servicepage::class.java)
+            "Car Towing" -> Intent(this, cartowing::class.java)
+            "Brake Service" -> Intent(this, BrakeService::class.java)
+            "Car Wash" -> Intent(this, CarWashServicePage::class.java)
+            "Tire Change" -> Intent(this, TireChangeServicePage::class.java)
+            "Battery Change" -> Intent(this, BatteryChangeServicePage::class.java)
+            "Service Contract" -> Intent(this, ServiceContractPage::class.java)
+            else -> null
+        }
+
+        intent?.let { startActivity(it) }
     }
 
     private fun setupSpecialOffers() {
@@ -144,6 +181,15 @@ class MainActivity : AppCompatActivity() {
         carWashOffer.setOnClickListener {
             Toast.makeText(this, "Car wash offer clicked", Toast.LENGTH_SHORT).show()
             // Open car wash offer details
+        }
+    }
+
+    override fun onBackPressed() {
+        // Optional: Prevent going back to auth screens if logged out
+        if (prefsHelper.isLoggedIn()) {
+            super.onBackPressed()
+        } else {
+            finish()
         }
     }
 }

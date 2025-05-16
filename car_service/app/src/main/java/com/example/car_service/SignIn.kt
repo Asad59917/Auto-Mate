@@ -1,20 +1,64 @@
 package com.example.car_service
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.example.car_service.databinding.ActivitySignInBinding
+import com.google.android.material.textfield.TextInputEditText
 
-class SignIn : AppCompatActivity() {
+class SignInActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivitySignInBinding
+    private lateinit var prefsHelper: PrefsHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_sign_in)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        binding = ActivitySignInBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        prefsHelper = PrefsHelper(this)
+
+        binding.signInButton.setOnClickListener {
+            val email = binding.emailInput.text.toString().trim()
+            val password = binding.passwordInput.text.toString().trim()
+
+            if (validateInputs(email, password)) {
+                if (prefsHelper.checkCredentials(email, password)) {
+                    // Credentials match - sign in successful
+                    prefsHelper.saveUser(email, password, true)
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                } else {
+                    Toast.makeText(this, "No user found with these credentials", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
+
+        binding.signUpLink.setOnClickListener {
+            startActivity(Intent(this, SignUpActivity::class.java))
+        }
+    }
+
+    private fun validateInputs(email: String, password: String): Boolean {
+        var isValid = true
+
+        if (email.isEmpty()) {
+            binding.emailInput.error = "Email is required"
+            isValid = false
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.emailInput.error = "Please enter a valid email"
+            isValid = false
+        }
+
+        if (password.isEmpty()) {
+            binding.passwordInput.error = "Password is required"
+            isValid = false
+        } else if (password.length < 6) {
+            binding.passwordInput.error = "Password must be at least 6 characters"
+            isValid = false
+        }
+
+        return isValid
     }
 }

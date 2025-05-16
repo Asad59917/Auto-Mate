@@ -15,7 +15,7 @@
         android:layout_height="250dp"
         android:contentDescription="Battery change service"
         android:scaleType="centerCrop"
-        android:src="@drawable/batterychange"
+        android:src="@drawable/batterychangeicon"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Top Bar with Back Button and Title (positioned over the image) -->

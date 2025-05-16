@@ -15,7 +15,7 @@
         android:layout_height="250dp"
         android:contentDescription="Brake service"
         android:scaleType="centerCrop"
-        android:src="@drawable/brakeservice"
+        android:src="@drawable/brakeserviceicon"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Top Bar with Back Button and Title (positioned over the image) -->
