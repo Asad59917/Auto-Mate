@@ -59,7 +59,6 @@ class MainActivity : AppCompatActivity() {
         val searchNav = findViewById<View>(R.id.searchNavItem)
         val locationNav = findViewById<View>(R.id.locationNavItem)
         val profileNav = findViewById<View>(R.id.profileNavItem)
-        val actionButton = findViewById<FloatingActionButton>(R.id.actionButton)
 
         homeNav.setOnClickListener {
             // Already on home screen
@@ -81,10 +80,6 @@ class MainActivity : AppCompatActivity() {
             showLogoutConfirmation()
         }
 
-        actionButton.setOnClickListener {
-            Toast.makeText(this, "New Request", Toast.LENGTH_SHORT).show()
-            // Open new service request dialog/screen
-        }
     }
 
     private fun showLogoutConfirmation() {
