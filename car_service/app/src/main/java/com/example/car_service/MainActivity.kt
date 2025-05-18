@@ -3,16 +3,16 @@ package com.example.car_service
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageButton
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var prefsHelper: PrefsHelper
+    private lateinit var locationBottomSheet: BottomSheetDialog
+    private lateinit var addLocationBottomSheet: BottomSheetDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,12 +28,280 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // Load saved location for current user
+        loadUserLocation()
+
         // Original setup functions
         setupNavigation()
         setupSearchBar()
         setupLocationAndVehicles()
         setupServiceCards()
         setupSpecialOffers()
+
+        // Initialize the location bottom sheet
+        setupLocationBottomSheet()
+
+        // Initialize the add location bottom sheet
+        setupAddLocationBottomSheet()
+    }
+
+    private fun loadUserLocation() {
+        // Get the location data for the currently logged in user
+        val locationTitle = findViewById<TextView>(R.id.locationTitle)
+        val locationType = prefsHelper.getLocationType()
+
+        // Update UI based on saved location type for this user
+        when (locationType) {
+            "Home" -> {
+                val location = prefsHelper.getHomeLocation()
+                if (location.isNotEmpty()) {
+                    locationTitle.text = location
+                } else {
+                    locationTitle.text = "Select location"
+                }
+            }
+            "Work" -> {
+                val location = prefsHelper.getWorkLocation()
+                if (location.isNotEmpty()) {
+                    locationTitle.text = location
+                } else {
+                    locationTitle.text = "Select location"
+                }
+            }
+            "Current" -> {
+                val location = prefsHelper.getCurrentLocation()
+                if (location != "Dubai, U.A.E") {
+                    locationTitle.text = location
+                } else {
+                    locationTitle.text = "Select location"
+                }
+            }
+            else -> locationTitle.text = "Select location"
+        }
+    }
+
+    private fun setupLocationBottomSheet() {
+        // Create the bottom sheet dialog
+        locationBottomSheet = BottomSheetDialog(this)
+        val locationView = layoutInflater.inflate(R.layout.location_bottom_sheet, null)
+        locationBottomSheet.setContentView(locationView)
+
+        // Setup click listeners for location options
+        val currentLocationItem = locationView.findViewById<View>(R.id.currentLocationItem)
+        val homeLocationItem = locationView.findViewById<View>(R.id.homeLocationItem)
+        val addWorkItem = locationView.findViewById<View>(R.id.addWorkItem)
+        val selectButton = locationView.findViewById<View>(R.id.selectButton)
+        val cancelButton = locationView.findViewById<TextView>(R.id.cancelButton)
+        val addNewButton = locationView.findViewById<TextView>(R.id.addNewButton)
+
+        // Update UI with saved locations for this user
+        val currentLocationText = locationView.findViewById<TextView>(R.id.currentLocationText)
+        val homeLocationText = locationView.findViewById<TextView>(R.id.homeLocationText)
+
+        // Set the saved locations text from preferences
+        val savedCurrentLocation = prefsHelper.getCurrentLocation()
+        if (savedCurrentLocation != "Dubai, U.A.E") {
+            currentLocationText.text = savedCurrentLocation
+        } else {
+            currentLocationText.text = "No location set"
+        }
+
+        val savedHomeLocation = prefsHelper.getHomeLocation()
+        if (savedHomeLocation.isNotEmpty()) {
+            homeLocationText.text = savedHomeLocation
+        } else {
+            homeLocationText.text = "No home location set"
+        }
+
+        // Display work address if it exists
+        val savedWorkLocation = prefsHelper.getWorkLocation()
+        val workLocationText = locationView.findViewById<TextView>(R.id.workLocationText)
+        val workLocationContainer = locationView.findViewById<View>(R.id.workLocationContainer)
+        val workTitleText = locationView.findViewById<TextView>(R.id.workTitleText)
+
+        if (savedWorkLocation.isNotEmpty()) {
+            // Show work location if saved
+            workLocationContainer.visibility = View.VISIBLE
+            workLocationText.text = savedWorkLocation
+
+            // Hide "Add work" item when we're showing the work container
+            addWorkItem.visibility = View.GONE
+        } else {
+            // Hide work container if no work location is saved
+            workLocationContainer.visibility = View.GONE
+
+            // Show "Add work" item
+            addWorkItem.visibility = View.VISIBLE
+            workTitleText.text = "Add work"
+        }
+
+        currentLocationItem.setOnClickListener {
+            // Handle current location selection
+            if (savedCurrentLocation != "Dubai, U.A.E") {
+                updateLocation("Current", savedCurrentLocation)
+            } else {
+                Toast.makeText(this, "Please add a current location first", Toast.LENGTH_SHORT).show()
+                showAddLocationBottomSheet("Current")
+            }
+            locationBottomSheet.dismiss()
+        }
+
+        homeLocationItem.setOnClickListener {
+            // Handle home location selection
+            if (savedHomeLocation.isNotEmpty()) {
+                updateLocation("Home", savedHomeLocation)
+            } else {
+                // No home location saved, ask user to add one
+                Toast.makeText(this, "Please add a home location first", Toast.LENGTH_SHORT).show()
+                showAddLocationBottomSheet("Home")
+            }
+            locationBottomSheet.dismiss()
+        }
+
+        addWorkItem.setOnClickListener {
+            if (savedWorkLocation.isNotEmpty()) {
+                // Use existing work location
+                updateLocation("Work", savedWorkLocation)
+            } else {
+                // Handle adding work location
+                showAddLocationBottomSheet("Work")
+            }
+            locationBottomSheet.dismiss()
+        }
+
+        workLocationContainer.setOnClickListener {
+            if (savedWorkLocation.isNotEmpty()) {
+                updateLocation("Work", savedWorkLocation)
+                locationBottomSheet.dismiss()
+            }
+        }
+
+        selectButton.setOnClickListener {
+            // Process the selected location
+            Toast.makeText(this, "Location selected", Toast.LENGTH_SHORT).show()
+            locationBottomSheet.dismiss()
+        }
+
+        cancelButton.setOnClickListener {
+            locationBottomSheet.dismiss()
+        }
+
+        addNewButton.setOnClickListener {
+            // Show add location bottom sheet
+            showAddLocationBottomSheet(null)
+            locationBottomSheet.dismiss()
+        }
+    }
+
+    private fun setupAddLocationBottomSheet() {
+        // Create the add location bottom sheet dialog
+        addLocationBottomSheet = BottomSheetDialog(this)
+        val addLocationView = layoutInflater.inflate(R.layout.add_location_bottom_sheet, null)
+        addLocationBottomSheet.setContentView(addLocationView)
+
+        // Get references to views
+        val cancelButton = addLocationView.findViewById<TextView>(R.id.cancelAddLocationButton)
+        val saveButton = addLocationView.findViewById<CardView>(R.id.saveButton)
+        val saveTopButton = addLocationView.findViewById<TextView>(R.id.saveLocationButton)
+        val locationTypeGroup = addLocationView.findViewById<RadioGroup>(R.id.locationTypeGroup)
+        val addressInput = addLocationView.findViewById<EditText>(R.id.addressInput)
+        val cityInput = addLocationView.findViewById<EditText>(R.id.cityInput)
+        val countryInput = addLocationView.findViewById<EditText>(R.id.countryInput)
+        val radioHome = addLocationView.findViewById<RadioButton>(R.id.radioHome)
+        val radioWork = addLocationView.findViewById<RadioButton>(R.id.radioWork)
+        val radioCurrent = addLocationView.findViewById<RadioButton>(R.id.radioCurrent)
+
+        // Set default value for country
+        countryInput.setText("U.A.E")
+
+        // Setup click listeners
+        cancelButton.setOnClickListener {
+            addLocationBottomSheet.dismiss()
+        }
+
+        val saveAction = saveAction@{
+            val address = addressInput.text.toString().trim()
+            val city = cityInput.text.toString().trim()
+            val country = countryInput.text.toString().trim()
+
+            if (address.isEmpty() || city.isEmpty() || country.isEmpty()) {
+                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                return@saveAction
+            }
+
+            val fullAddress = if (address.contains(city)) {
+                "$address · $country"
+            } else {
+                "$address · $city, $country"
+            }
+
+            val selectedLocationType = when (locationTypeGroup.checkedRadioButtonId) {
+                R.id.radioHome -> "Home"
+                R.id.radioWork -> "Work"
+                R.id.radioCurrent -> "Current"
+                else -> "Current"
+            }
+
+            when (selectedLocationType) {
+                "Home" -> prefsHelper.saveHomeLocation(fullAddress)
+                "Work" -> prefsHelper.saveWorkLocation(fullAddress)
+                "Current" -> prefsHelper.saveCurrentLocation(fullAddress)
+            }
+
+            // Update location type and address
+            prefsHelper.saveLocation(selectedLocationType, fullAddress)
+
+            // Update UI
+            updateLocation(selectedLocationType, fullAddress)
+
+            Toast.makeText(this, "$selectedLocationType location saved", Toast.LENGTH_SHORT).show()
+            addLocationBottomSheet.dismiss()
+
+            // Refresh location bottom sheet if needed later
+            setupLocationBottomSheet()
+        }
+
+        saveButton.setOnClickListener { saveAction.invoke() }
+        saveTopButton.setOnClickListener { saveAction.invoke() }
+    }
+
+    private fun showAddLocationBottomSheet(locationType: String?) {
+        if (!this::addLocationBottomSheet.isInitialized) {
+            setupAddLocationBottomSheet()
+        }
+
+        // Get references to radio buttons
+        val radioHome = addLocationBottomSheet.findViewById<RadioButton>(R.id.radioHome)
+        val radioWork = addLocationBottomSheet.findViewById<RadioButton>(R.id.radioWork)
+        val radioCurrent = addLocationBottomSheet.findViewById<RadioButton>(R.id.radioCurrent)
+
+        // Pre-select the specified location type if provided
+        when (locationType) {
+            "Home" -> radioHome?.isChecked = true
+            "Work" -> radioWork?.isChecked = true
+            "Current" -> radioCurrent?.isChecked = true
+        }
+
+        // Clear input fields
+        val addressInput = addLocationBottomSheet.findViewById<EditText>(R.id.addressInput)
+        val cityInput = addLocationBottomSheet.findViewById<EditText>(R.id.cityInput)
+
+        addressInput?.setText("")
+        cityInput?.setText("")
+
+        // Show the bottom sheet
+        addLocationBottomSheet.show()
+    }
+
+    private fun updateLocation(locationType: String, address: String) {
+        // Update location in UI
+        val locationTitle = findViewById<TextView>(R.id.locationTitle)
+        locationTitle.text = address
+
+        // Update location in preferences for this specific user
+        prefsHelper.saveLocation(locationType, address)
+
+        Toast.makeText(this, "$locationType location selected", Toast.LENGTH_SHORT).show()
     }
 
     private fun setupNavigation() {
@@ -47,7 +315,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.locationTitle).setOnClickListener {
-            Toast.makeText(this, "Location clicked", Toast.LENGTH_SHORT).show()
+            // Show location bottom sheet instead of just a toast
+            locationBottomSheet.show()
         }
 
         // Bottom navigation
@@ -71,15 +340,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         locationNav.setOnClickListener {
-            Toast.makeText(this, "Location clicked", Toast.LENGTH_SHORT).show()
-            // Navigate to location screen
+            // Show location bottom sheet instead of just a toast
+            locationBottomSheet.show()
         }
 
         profileNav.setOnClickListener {
             // Modified to handle logout
             showLogoutConfirmation()
         }
-
     }
 
     private fun showLogoutConfirmation() {
@@ -109,8 +377,8 @@ class MainActivity : AppCompatActivity() {
         val vehiclesButton = findViewById<CardView>(R.id.myVehiclesButton)
 
         locationButton.setOnClickListener {
-            Toast.makeText(this, "My location clicked", Toast.LENGTH_SHORT).show()
-            // Show location selector dialog
+            // Show location bottom sheet instead of just a toast
+            locationBottomSheet.show()
         }
 
         vehiclesButton.setOnClickListener {
@@ -180,6 +448,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        // Check if bottom sheets are showing and dismiss them
+        if (this::locationBottomSheet.isInitialized && locationBottomSheet.isShowing) {
+            locationBottomSheet.dismiss()
+            return
+        }
+
+        if (this::addLocationBottomSheet.isInitialized && addLocationBottomSheet.isShowing) {
+            addLocationBottomSheet.dismiss()
+            return
+        }
+
         // Optional: Prevent going back to auth screens if logged out
         if (prefsHelper.isLoggedIn()) {
             super.onBackPressed()

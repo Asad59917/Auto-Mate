@@ -17,7 +17,7 @@
             android:exported="false" />
         <!-- Sign In Activity (Now the launcher) -->
         <activity
-            android:name=".AddVehicleActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -27,7 +27,7 @@
             </intent-filter>
         </activity> <!-- Main App Activity -->
         <activity
-            android:name=".MainActivity"
+            android:name=".AddVehicleActivity"
             android:exported="false" /> <!-- Sign Up Activity -->
         <activity
             android:name=".SignUpActivity"
