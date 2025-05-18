@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.car_service.databinding.ActivitySignInBinding
-import com.google.android.material.textfield.TextInputEditText
 
 class SignInActivity : AppCompatActivity() {
 
@@ -24,13 +23,15 @@ class SignInActivity : AppCompatActivity() {
             val password = binding.passwordInput.text.toString().trim()
 
             if (validateInputs(email, password)) {
-                if (prefsHelper.checkCredentials(email, password)) {
-                    // Credentials match - sign in successful
-                    prefsHelper.saveUser(email, password, true)
+                if (prefsHelper.loginUser(email, password)) {
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 } else {
-                    Toast.makeText(this, "No user found with these credentials", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Invalid email or password",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }

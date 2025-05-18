@@ -8,16 +8,6 @@
     android:padding="24dp"
     tools:context=".SignUpActivity">
 
-    <!-- Back button -->
-    <ImageView
-        android:id="@+id/back_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:src="@drawable/ic_arrow_back"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <!-- Auto Mate Logo -->
     <ImageView
         android:id="@+id/logo_image"
@@ -26,7 +16,7 @@
         android:src="@drawable/logo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/back_button" />
+        tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/sign_up_title"

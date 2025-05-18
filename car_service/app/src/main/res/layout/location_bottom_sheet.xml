@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@color/white"
     android:layout_height="match_parent">
 
     <LinearLayout
@@ -342,13 +343,6 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Bottom handle indicator -->
-        <View
-            android:layout_width="40dp"
-            android:layout_height="4dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:background="#CCCCCC" />
 
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.car_service.databinding.ActivityAddVehicleBinding
 import com.google.android.material.card.MaterialCardView
@@ -143,22 +144,24 @@ class AddVehicleActivity : AppCompatActivity() {
             val chassisNumber = binding.chassisInput.text.toString()
             val licensePlate = binding.licenseInput.text.toString()
 
-            // Here you would typically:
-            // 1. Validate that all necessary fields are filled
-            // 2. Create a Vehicle object with the collected data
-            // 3. Save to database or send to API
-            // 4. Show success message or navigate back
+            // Validate required fields
+            if (make.isEmpty() || model.isEmpty() || licensePlate.isEmpty()) {
+                Toast.makeText(this, "Please fill in Make, Model and License Plate fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-            // For now, just print the collected data and finish
-            println("""
-                Vehicle Type: $vehicleType
-                Color: $color
-                Make: $make
-                Model: $model
-                Chassis Number: $chassisNumber
-                License Plate: $licensePlate
-            """.trimIndent())
+            // Save vehicle to preferences
+            val prefsHelper = PrefsHelper(this)
+            prefsHelper.saveVehicle(
+                type = vehicleType,
+                brand = make,
+                model = model,
+                color = color,
+                chassisNumber = chassisNumber,
+                plateNumber = licensePlate
+            )
 
+            Toast.makeText(this, "Vehicle saved successfully", Toast.LENGTH_SHORT).show()
             finish()
         }
     }
