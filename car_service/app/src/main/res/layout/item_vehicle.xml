@@ -1,34 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:elevation="2dp"
+    android:background="@drawable/rounded_bg">
 
-    <RadioButton
-        android:id="@+id/vehicleRadio"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"/>
+    <ImageView
+        android:id="@+id/vehicleLogo"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/vehicleBrandModel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintStart_toEndOf="@id/vehicleLogo"
+        app:layout_constraintEnd_toStartOf="@id/arrowRight"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/vehicleName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
+    <TextView
+        android:id="@+id/vehiclePlate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toEndOf="@id/vehicleLogo"
+        app:layout_constraintEnd_toStartOf="@id/arrowRight"
+        app:layout_constraintTop_toBottomOf="@id/vehicleBrandModel" />
 
-        <TextView
-            android:id="@+id/vehiclePlate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@color/gray_text"/>
-    </LinearLayout>
-</LinearLayout>
+    <ImageView
+        android:id="@+id/arrowRight"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

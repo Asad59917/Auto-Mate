@@ -1,12 +1,15 @@
 package com.example.car_service
 
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class MainActivity : AppCompatActivity() {
@@ -15,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationBottomSheet: BottomSheetDialog
     private lateinit var addLocationBottomSheet: BottomSheetDialog
     private lateinit var vehicleBottomSheet: BottomSheetDialog
+    private var selectedVehicleIndex = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,10 +54,16 @@ class MainActivity : AppCompatActivity() {
         setupVehicleBottomSheet()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh vehicle list when returning from AddVehicleActivity
+        if (::vehicleBottomSheet.isInitialized && vehicleBottomSheet.isShowing) {
+            setupVehicleBottomSheet()
+        }
+    }
+
     private fun loadUserLocation() {
-        // Get the location data for the currently logged in user
         val locationTitle = findViewById<TextView>(R.id.locationTitle)
-        val locationType = prefsHelper.getLocationType()
         val address = prefsHelper.getSelectedAddress()
 
         if (address.isNotEmpty() && address != "Dubai, U.A.E") {
@@ -64,7 +74,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupLocationBottomSheet() {
-        // Create the bottom sheet dialog
         locationBottomSheet = BottomSheetDialog(this)
         val locationView = layoutInflater.inflate(R.layout.location_bottom_sheet, null)
         locationBottomSheet.setContentView(locationView)
@@ -77,18 +86,16 @@ class MainActivity : AppCompatActivity() {
         val cancelButton = locationView.findViewById<TextView>(R.id.cancelButton)
         val addNewButton = locationView.findViewById<TextView>(R.id.addNewButton)
 
-        // Update UI with saved locations for this user
+        // Update UI with saved locations
         val currentLocationText = locationView.findViewById<TextView>(R.id.currentLocationText)
         val homeLocationText = locationView.findViewById<TextView>(R.id.homeLocationText)
         val workLocationText = locationView.findViewById<TextView>(R.id.workLocationText)
         val workLocationContainer = locationView.findViewById<View>(R.id.workLocationContainer)
         val workTitleText = locationView.findViewById<TextView>(R.id.workTitleText)
 
-        // Set saved locations
         currentLocationText.text = prefsHelper.getCurrentLocation().ifEmpty { "No location set" }
         homeLocationText.text = prefsHelper.getHomeLocation().ifEmpty { "No home location set" }
 
-        // Handle work location visibility
         val savedWorkLocation = prefsHelper.getWorkLocation()
         if (savedWorkLocation.isNotEmpty()) {
             workLocationContainer.visibility = View.VISIBLE
@@ -128,14 +135,8 @@ class MainActivity : AppCompatActivity() {
             locationBottomSheet.dismiss()
         }
 
-        selectButton.setOnClickListener {
-            locationBottomSheet.dismiss()
-        }
-
-        cancelButton.setOnClickListener {
-            locationBottomSheet.dismiss()
-        }
-
+        selectButton.setOnClickListener { locationBottomSheet.dismiss() }
+        cancelButton.setOnClickListener { locationBottomSheet.dismiss() }
         addNewButton.setOnClickListener {
             showAddLocationBottomSheet(null)
             locationBottomSheet.dismiss()
@@ -155,7 +156,6 @@ class MainActivity : AppCompatActivity() {
         val cityInput = addLocationView.findViewById<EditText>(R.id.cityInput)
         val countryInput = addLocationView.findViewById<EditText>(R.id.countryInput)
 
-        // Set default country
         countryInput.setText("U.A.E")
 
         val saveAction = saveAction@{
@@ -181,13 +181,12 @@ class MainActivity : AppCompatActivity() {
                 else -> "Current"
             }
 
-            // Save the location
             prefsHelper.saveLocation(selectedLocationType, fullAddress)
             updateLocation(selectedLocationType, fullAddress)
 
             Toast.makeText(this, "$selectedLocationType location saved", Toast.LENGTH_SHORT).show()
             addLocationBottomSheet.dismiss()
-            setupLocationBottomSheet() // Refresh location sheet
+            setupLocationBottomSheet()
         }
 
         cancelButton.setOnClickListener { addLocationBottomSheet.dismiss() }
@@ -196,46 +195,100 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupVehicleBottomSheet() {
-        // Create the bottom sheet dialog for vehicles
         vehicleBottomSheet = BottomSheetDialog(this)
         val vehicleView = layoutInflater.inflate(R.layout.vehicle_bottom_sheet, null)
         vehicleBottomSheet.setContentView(vehicleView)
 
-        // Get references to views
         val cancelButton = vehicleView.findViewById<TextView>(R.id.cancelButton)
         val addNewButton = vehicleView.findViewById<TextView>(R.id.addNewButton)
         val selectButton = vehicleView.findViewById<CardView>(R.id.selectButton)
         val vehicleListContainer = vehicleView.findViewById<LinearLayout>(R.id.vehicleListContainer)
+        val emptyStateView = vehicleView.findViewById<TextView>(R.id.emptyStateText)
 
-        // Empty state initially
-        vehicleListContainer.removeAllViews()
+        // Function to refresh the vehicle list
+        fun refreshVehicleList() {
+            vehicleListContainer.removeAllViews()
+            val vehicles = prefsHelper.getAllVehicles()
 
-        // Setup add new vehicle button
+            if (vehicles.isEmpty()) {
+                emptyStateView.visibility = View.VISIBLE
+                vehicleListContainer.visibility = View.GONE
+            } else {
+                emptyStateView.visibility = View.GONE
+                vehicleListContainer.visibility = View.VISIBLE
+
+                vehicles.forEachIndexed { index, vehicle ->
+                    val vehicleItemView = layoutInflater.inflate(R.layout.item_vehicle, null)
+
+                    vehicleItemView.findViewById<TextView>(R.id.vehicleBrandModel).text = vehicle.brand
+
+                    vehicleItemView.findViewById<TextView>(R.id.vehiclePlate).text = vehicle.plateNumber
+
+
+                    // Highlight selected vehicle
+                    if (index == selectedVehicleIndex) {
+                        vehicleItemView.setBackgroundColor(
+                            ContextCompat.getColor(this, R.color.selected_item_background)
+                        )
+                    }
+
+                    vehicleItemView.setOnClickListener {
+                        selectedVehicleIndex = index
+                        refreshVehicleList() // Refresh to update selection
+                    }
+
+                    vehicleListContainer.addView(vehicleItemView)
+
+                    // Add divider between vehicles
+                    if (index < vehicles.size - 1) {
+                        val divider = View(this)
+                        divider.layoutParams = LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            1
+                        ).apply {
+                            setMargins(0, 16.dpToPx(), 0, 16.dpToPx())
+                        }
+                        divider.setBackgroundColor(
+                            ContextCompat.getColor(this, R.color.divider_gray)
+                        )
+                        vehicleListContainer.addView(divider)
+                    }
+                }
+            }
+        }
+
+        // Initial load
+        refreshVehicleList()
+
         addNewButton.setOnClickListener {
-            Toast.makeText(this, "Add new vehicle clicked", Toast.LENGTH_SHORT).show()
-            vehicleBottomSheet.dismiss()
-            // Add navigation to vehicle add screen here if needed
             startActivity(Intent(this, AddVehicleActivity::class.java))
-        }
-
-        // Setup edit vehicles button
-        val editVehiclesButton = vehicleView.findViewById<View>(R.id.editVehiclesContainer)
-        editVehiclesButton.setOnClickListener {
-            Toast.makeText(this, "Edit vehicles clicked", Toast.LENGTH_SHORT).show()
             vehicleBottomSheet.dismiss()
-            // Add navigation to vehicle edit screen here if needed
-            // startActivity(Intent(this, EditVehiclesActivity::class.java))
         }
 
-        // Setup cancel button
+
         cancelButton.setOnClickListener {
             vehicleBottomSheet.dismiss()
         }
 
-        // Setup select button
         selectButton.setOnClickListener {
-            Toast.makeText(this, "No vehicle selected", Toast.LENGTH_SHORT).show()
-            vehicleBottomSheet.dismiss()
+            val vehicles = prefsHelper.getAllVehicles()
+            if (selectedVehicleIndex in 0 until vehicles.size) {
+                val selectedVehicle = vehicles[selectedVehicleIndex]
+                Toast.makeText(this,
+                    "Selected: ${selectedVehicle.brand} ${selectedVehicle.model}",
+                    Toast.LENGTH_SHORT).show()
+                vehicleBottomSheet.dismiss()
+            } else if (vehicles.isNotEmpty()) {
+                // Auto-select first vehicle if none selected
+                selectedVehicleIndex = 0
+                refreshVehicleList()
+                Toast.makeText(this,
+                    "Selected: ${vehicles[0].brand} ${vehicles[0].model}",
+                    Toast.LENGTH_SHORT).show()
+                vehicleBottomSheet.dismiss()
+            } else {
+                Toast.makeText(this, "No vehicles available", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -282,10 +335,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Bottom navigation
-        setupBottomNavigation()
-    }
-
-    private fun setupBottomNavigation() {
         findViewById<View>(R.id.homeNavItem).setOnClickListener {
             // Already on home screen
         }
@@ -401,4 +450,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun Int.dpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 }
