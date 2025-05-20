@@ -2,53 +2,102 @@ package com.example.car_service
 
 import android.content.Context
 import android.content.SharedPreferences
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.File
 import java.security.MessageDigest
 
 class PrefsHelper(context: Context) {
-    private val sharedPref: SharedPreferences =
-        context.getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE)
+    private val context: Context = context.applicationContext
+    private val sharedPref: SharedPreferences = context.getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE)
+    private val USER_DATA_FILE = "user_data.json"
 
-    private val locationPref: SharedPreferences =
-        context.getSharedPreferences("LocationPrefs", Context.MODE_PRIVATE)
-
-    private val vehiclePref: SharedPreferences =
-        context.getSharedPreferences("VehiclePrefs", Context.MODE_PRIVATE)
-
-    // Authentication methods
+    // ======================== Authentication Methods ========================
     fun registerUser(email: String, password: String): Boolean {
-        val existingEmail = sharedPref.getString("EMAIL", null)
-        if (existingEmail != null && existingEmail.equals(email, ignoreCase = true)) {
-            return false // User already exists
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        // Check if user already exists
+        for (i in 0 until users.length()) {
+            if (users.getJSONObject(i).getString("email").equals(email, ignoreCase = true)) {
+                return false
+            }
         }
 
-        sharedPref.edit().apply {
-            putString("EMAIL", email)
-            putString("PASSWORD", hashPassword(password))
-            putBoolean("IS_LOGGED_IN", false)
-            apply()
+        // Add new user
+        val newUser = JSONObject().apply {
+            put("email", email)
+            put("password", hashPassword(password))
+            put("isLoggedIn", false)
+            put("locations", JSONObject().apply {
+                put("selectedLocationType", "Current")
+                put("selectedAddress", "Dubai, U.A.E")
+                put("homeAddress", "")
+                put("workAddress", "")
+                put("currentAddress", "Dubai, U.A.E")
+            })
+            put("vehicles", JSONArray())
         }
+
+        users.put(newUser)
+        saveUserData(userData)
         return true
     }
 
     fun loginUser(email: String, password: String): Boolean {
-        val savedEmail = sharedPref.getString("EMAIL", "")
-        val savedPassword = sharedPref.getString("PASSWORD", "")
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
 
-        return if (email.equals(savedEmail, ignoreCase = true) &&
-            hashPassword(password) == savedPassword) {
-            sharedPref.edit().putBoolean("IS_LOGGED_IN", true).apply()
-            true
-        } else {
-            false
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email").equals(email, ignoreCase = true) &&
+                user.getString("password") == hashPassword(password)) {
+
+                // Mark user as logged in
+                user.put("isLoggedIn", true)
+                saveUserData(userData)
+
+                // Store current user email in SharedPreferences for quick access
+                sharedPref.edit().putString("CURRENT_USER", email).apply()
+                return true
+            }
         }
+        return false
     }
 
-    fun isLoggedIn(): Boolean = sharedPref.getBoolean("IS_LOGGED_IN", false)
+    fun isLoggedIn(): Boolean {
+        val currentUserEmail = sharedPref.getString("CURRENT_USER", null) ?: return false
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
 
-    fun getCurrentUserEmail(): String? = sharedPref.getString("EMAIL", null)
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail && user.getBoolean("isLoggedIn")) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun getCurrentUserEmail(): String? {
+        return sharedPref.getString("CURRENT_USER", null)
+    }
 
     fun logout() {
-        sharedPref.edit().putBoolean("IS_LOGGED_IN", false).apply()
+        val currentUserEmail = getCurrentUserEmail() ?: return
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                user.put("isLoggedIn", false)
+                saveUserData(userData)
+                break
+            }
+        }
+
+        sharedPref.edit().remove("CURRENT_USER").apply()
     }
 
     private fun hashPassword(password: String): String {
@@ -61,74 +110,87 @@ class PrefsHelper(context: Context) {
         }
     }
 
-    // Location methods
+    // ======================== Location Methods ========================
     fun saveLocation(locationType: String, address: String) {
-        val userEmail = getCurrentUserEmail() ?: return
-        val locationTypeKey = "${userEmail}_SELECTED_LOCATION_TYPE"
-        val selectedAddressKey = "${userEmail}_SELECTED_ADDRESS"
+        val currentUserEmail = getCurrentUserEmail() ?: return
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
 
-        locationPref.edit().apply {
-            putString(locationTypeKey, locationType)
-            putString(selectedAddressKey, address)
-            apply()
-        }
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                val locations = user.getJSONObject("locations")
+                locations.put("selectedLocationType", locationType)
+                locations.put("selectedAddress", address)
 
-        when (locationType) {
-            "Home" -> saveHomeLocation(address)
-            "Work" -> saveWorkLocation(address)
-            "Current" -> saveCurrentLocation(address)
+                when (locationType) {
+                    "Home" -> locations.put("homeAddress", address)
+                    "Work" -> locations.put("workAddress", address)
+                    "Current" -> locations.put("currentAddress", address)
+                }
+                break
+            }
         }
+        saveUserData(userData)
     }
 
     fun getLocationType(): String {
-        val userEmail = getCurrentUserEmail() ?: return "Current"
-        val locationTypeKey = "${userEmail}_SELECTED_LOCATION_TYPE"
-        return locationPref.getString(locationTypeKey, "Current") ?: "Current"
+        return getCurrentUserLocations()?.optString("selectedLocationType", "Current") ?: "Current"
     }
 
     fun getSelectedAddress(): String {
-        val userEmail = getCurrentUserEmail() ?: return "Dubai, U.A.E"
-        val selectedAddressKey = "${userEmail}_SELECTED_ADDRESS"
-        val address = locationPref.getString(selectedAddressKey, null)
+        val locations = getCurrentUserLocations() ?: return "Dubai, U.A.E"
+        val selectedAddress = locations.optString("selectedAddress", null)
 
-        return address ?: when (getLocationType()) {
+        return selectedAddress ?: when (getLocationType()) {
             "Home" -> getHomeLocation().ifEmpty { "Dubai, U.A.E" }
             "Work" -> getWorkLocation().ifEmpty { "Dubai, U.A.E" }
             else -> getCurrentLocation()
         }
     }
 
-    fun saveHomeLocation(address: String) {
-        val userEmail = getCurrentUserEmail() ?: return
-        locationPref.edit().putString("${userEmail}_HOME_ADDRESS", address).apply()
+    fun saveHomeLocation(address: String) = saveUserLocation("homeAddress", address)
+    fun saveWorkLocation(address: String) = saveUserLocation("workAddress", address)
+    fun saveCurrentLocation(address: String) = saveUserLocation("currentAddress", address)
+
+    fun getHomeLocation(): String = getUserLocation("homeAddress")
+    fun getWorkLocation(): String = getUserLocation("workAddress")
+    fun getCurrentLocation(): String = getUserLocation("currentAddress", "Dubai, U.A.E")
+
+    private fun saveUserLocation(key: String, address: String) {
+        val currentUserEmail = getCurrentUserEmail() ?: return
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                user.getJSONObject("locations").put(key, address)
+                break
+            }
+        }
+        saveUserData(userData)
     }
 
-    fun getHomeLocation(): String {
-        val userEmail = getCurrentUserEmail() ?: return ""
-        return locationPref.getString("${userEmail}_HOME_ADDRESS", "") ?: ""
+    private fun getUserLocation(key: String, default: String = ""): String {
+        return getCurrentUserLocations()?.optString(key, default) ?: default
     }
 
-    fun saveWorkLocation(address: String) {
-        val userEmail = getCurrentUserEmail() ?: return
-        locationPref.edit().putString("${userEmail}_WORK_ADDRESS", address).apply()
+    private fun getCurrentUserLocations(): JSONObject? {
+        val currentUserEmail = getCurrentUserEmail() ?: return null
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                return user.getJSONObject("locations")
+            }
+        }
+        return null
     }
 
-    fun getWorkLocation(): String {
-        val userEmail = getCurrentUserEmail() ?: return ""
-        return locationPref.getString("${userEmail}_WORK_ADDRESS", "") ?: ""
-    }
-
-    fun saveCurrentLocation(address: String) {
-        val userEmail = getCurrentUserEmail() ?: return
-        locationPref.edit().putString("${userEmail}_CURRENT_ADDRESS", address).apply()
-    }
-
-    fun getCurrentLocation(): String {
-        val userEmail = getCurrentUserEmail() ?: return "Dubai, U.A.E"
-        return locationPref.getString("${userEmail}_CURRENT_ADDRESS", "Dubai, U.A.E") ?: "Dubai, U.A.E"
-    }
-
-    // Vehicle methods
+    // ======================== Vehicle Methods ========================
     fun saveVehicle(
         type: String,
         brand: String,
@@ -137,36 +199,45 @@ class PrefsHelper(context: Context) {
         chassisNumber: String,
         plateNumber: String
     ) {
-        val userEmail = getCurrentUserEmail() ?: return
-        val vehicleCount = vehiclePref.getInt("${userEmail}_VEHICLE_COUNT", 0)
+        val currentUserEmail = getCurrentUserEmail() ?: return
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
 
-        vehiclePref.edit().apply {
-            putString("${userEmail}_VEHICLE_${vehicleCount}_TYPE", type)
-            putString("${userEmail}_VEHICLE_${vehicleCount}_BRAND", brand)
-            putString("${userEmail}_VEHICLE_${vehicleCount}_MODEL", model)
-            putString("${userEmail}_VEHICLE_${vehicleCount}_COLOR", color)
-            putString("${userEmail}_VEHICLE_${vehicleCount}_CHASSIS", chassisNumber)
-            putString("${userEmail}_VEHICLE_${vehicleCount}_PLATE", plateNumber)
-            putInt("${userEmail}_VEHICLE_COUNT", vehicleCount + 1)
-            apply()
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                val vehicles = user.getJSONArray("vehicles")
+                vehicles.put(JSONObject().apply {
+                    put("type", type)
+                    put("brand", brand)
+                    put("model", model)
+                    put("color", color)
+                    put("chassisNumber", chassisNumber)
+                    put("plateNumber", plateNumber)
+                })
+                break
+            }
         }
+        saveUserData(userData)
     }
 
     fun getVehicleCount(): Int {
-        val userEmail = getCurrentUserEmail() ?: return 0
-        return vehiclePref.getInt("${userEmail}_VEHICLE_COUNT", 0)
+        return getCurrentUserVehicles()?.length() ?: 0
     }
 
     fun getVehicle(index: Int): Vehicle? {
-        val userEmail = getCurrentUserEmail() ?: return null
-        val type = vehiclePref.getString("${userEmail}_VEHICLE_${index}_TYPE", null) ?: return null
-        val brand = vehiclePref.getString("${userEmail}_VEHICLE_${index}_BRAND", null) ?: return null
-        val model = vehiclePref.getString("${userEmail}_VEHICLE_${index}_MODEL", null) ?: return null
-        val color = vehiclePref.getString("${userEmail}_VEHICLE_${index}_COLOR", "") ?: ""
-        val chassis = vehiclePref.getString("${userEmail}_VEHICLE_${index}_CHASSIS", "") ?: ""
-        val plate = vehiclePref.getString("${userEmail}_VEHICLE_${index}_PLATE", null) ?: return null
+        val vehicles = getCurrentUserVehicles() ?: return null
+        if (index < 0 || index >= vehicles.length()) return null
 
-        return Vehicle(type, brand, model, color, chassis, plate)
+        val vehicleObj = vehicles.getJSONObject(index)
+        return Vehicle(
+            vehicleObj.getString("type"),
+            vehicleObj.getString("brand"),
+            vehicleObj.getString("model"),
+            vehicleObj.optString("color", ""),
+            vehicleObj.optString("chassisNumber", ""),
+            vehicleObj.getString("plateNumber")
+        )
     }
 
     fun getAllVehicles(): List<Vehicle> {
@@ -176,28 +247,61 @@ class PrefsHelper(context: Context) {
         for (i in 0 until count) {
             getVehicle(i)?.let { vehicles.add(it) }
         }
-
         return vehicles
     }
 
     fun clearVehicles() {
-        val userEmail = getCurrentUserEmail() ?: return
-        val count = getVehicleCount()
+        val currentUserEmail = getCurrentUserEmail() ?: return
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
 
-        vehiclePref.edit().apply {
-            for (i in 0 until count) {
-                remove("${userEmail}_VEHICLE_${i}_TYPE")
-                remove("${userEmail}_VEHICLE_${i}_BRAND")
-                remove("${userEmail}_VEHICLE_${i}_MODEL")
-                remove("${userEmail}_VEHICLE_${i}_COLOR")
-                remove("${userEmail}_VEHICLE_${i}_CHASSIS")
-                remove("${userEmail}_VEHICLE_${i}_PLATE")
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                user.put("vehicles", JSONArray())
+                break
             }
-            putInt("${userEmail}_VEHICLE_COUNT", 0)
-            apply()
+        }
+        saveUserData(userData)
+    }
+
+    private fun getCurrentUserVehicles(): JSONArray? {
+        val currentUserEmail = getCurrentUserEmail() ?: return null
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                return user.getJSONArray("vehicles")
+            }
+        }
+        return null
+    }
+
+    // ======================== JSON File Operations ========================
+    private fun loadUserData(): JSONObject {
+        return try {
+            val file = File(context.filesDir, USER_DATA_FILE)
+            if (!file.exists()) return JSONObject().apply { put("users", JSONArray()) }
+
+            val jsonString = file.readText()
+            JSONObject(jsonString)
+        } catch (e: Exception) {
+            JSONObject().apply { put("users", JSONArray()) }
         }
     }
 
+    private fun saveUserData(data: JSONObject) {
+        try {
+            val file = File(context.filesDir, USER_DATA_FILE)
+            file.writeText(data.toString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    // ======================== Data Classes ========================
     data class Vehicle(
         val type: String,
         val brand: String,
