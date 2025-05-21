@@ -75,31 +75,27 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <RadioButton
+                <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/radioHome"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Home"
-                    android:textSize="14sp"
-                    android:paddingStart="8dp"
-                    android:layout_marginBottom="4dp" />
+                    app:buttonTint="@color/radio_button_tint" />
 
                 <RadioButton
                     android:id="@+id/radioWork"
+                    app:buttonTint="@color/radio_button_tint"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Work"
-                    android:textSize="14sp"
-                    android:paddingStart="8dp"
                     android:layout_marginBottom="4dp" />
 
                 <RadioButton
                     android:id="@+id/radioCurrent"
+                    app:buttonTint="@color/radio_button_tint"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Current"
-                    android:textSize="14sp"
-                    android:paddingStart="8dp"
                     android:checked="true" />
             </RadioGroup>
         </LinearLayout>
@@ -209,7 +205,7 @@
             android:layout_marginTop="24dp"
             app:cardCornerRadius="28dp"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="#4285F4">
+            app:cardBackgroundColor="@color/blue_primary">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -226,14 +222,6 @@
                     android:textStyle="bold" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
-        <!-- Bottom handle indicator -->
-        <View
-            android:layout_width="40dp"
-            android:layout_height="4dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:background="#CCCCCC" />
 
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

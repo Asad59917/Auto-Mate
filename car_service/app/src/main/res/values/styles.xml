@@ -12,5 +12,9 @@
         <item name="cardElevation">0dp</item>
         <item name="android:layout_marginBottom">12dp</item>
     </style>
-
+    <style name="BlueRadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="buttonTint">@color/blue_primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:paddingStart">8dp</item>
+    </style>
 </resources>
