@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="16dp"
-                android:text="Select the date and time"
+                android:text="Service Name"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -54,22 +54,34 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="28dp"
-                android:text="Select Vehicle"
+                android:layout_marginTop="5dp"
+                android:text="Service price"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvServiceName" />
+
+            <TextView
+                android:id="@+id/tvSelectVehicle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="30dp"
+                android:text="Select Vehicle"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvPrice" />
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardSelectVehicle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp"
-                app:layout_constraintTop_toBottomOf="@id/tvPrice">
+                android:layout_marginTop="15dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="5dp"
+                app:layout_constraintTop_toBottomOf="@id/tvSelectVehicle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -141,7 +153,7 @@
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="1dp"
+                app:cardElevation="5dp"
                 app:layout_constraintTop_toBottomOf="@id/tvSelectLocation">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -222,7 +234,7 @@
                     android:layout_height="48dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="8dp"
+                    app:cardCornerRadius="10dp"
                     app:cardElevation="0dp">
 
                     <TextView
@@ -242,7 +254,7 @@
                     android:layout_height="48dp"
                     android:layout_marginHorizontal="4dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="8dp"
+                    app:cardCornerRadius="10dp"
                     app:cardElevation="0dp">
 
                     <TextView
@@ -262,7 +274,7 @@
                     android:layout_height="48dp"
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="8dp"
+                    app:cardCornerRadius="10dp"
                     app:cardElevation="0dp">
 
                     <TextView
@@ -283,7 +295,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="8dp"
-                app:cardCornerRadius="8dp"
+                app:cardCornerRadius="10dp"
                 app:cardElevation="0dp"
                 app:layout_constraintTop_toBottomOf="@id/timeDateOptions">
 
@@ -345,8 +357,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="5dp"
                 app:layout_constraintTop_toBottomOf="@id/tvSelectPayment">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -404,16 +416,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="15dp"
                 android:layout_marginBottom="24dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="5dp"
                 app:layout_constraintTop_toBottomOf="@id/cardVisa">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp">
+                    android:padding="23dp">
 
                     <TextView
                         android:id="@+id/tvAddPayment"
@@ -445,7 +457,7 @@
         android:layout_height="56dp"
         android:layout_marginHorizontal="60dp"
         android:layout_marginBottom="32dp"
-        app:cardBackgroundColor="@color/blue"
+        app:cardBackgroundColor="@color/blue_primary"
         app:cardCornerRadius="16dp"
         app:cardElevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
