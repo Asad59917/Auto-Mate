@@ -12,19 +12,39 @@ class PrefsHelper(context: Context) {
     private val sharedPref: SharedPreferences = context.getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE)
     private val USER_DATA_FILE = "user_data.json"
 
-    // ======================== Authentication Methods ========================
+    // Data classes
+    data class Vehicle(
+        val type: String,
+        val brand: String,
+        val model: String,
+        val color: String,
+        val chassisNumber: String,
+        val plateNumber: String
+    )
+
+    data class Booking(
+        val serviceId: String,
+        val serviceName: String,
+        val vehicleBrand: String,
+        val vehicleModel: String,
+        val plateNumber: String,
+        val bookingDate: String,
+        val location: String,
+        val price: Int,
+        val bookingTime: Long = System.currentTimeMillis()
+    )
+
+    // Authentication Methods
     fun registerUser(email: String, password: String): Boolean {
         val userData = loadUserData()
         val users = userData.getJSONArray("users")
 
-        // Check if user already exists
         for (i in 0 until users.length()) {
             if (users.getJSONObject(i).getString("email").equals(email, ignoreCase = true)) {
                 return false
             }
         }
 
-        // Add new user
         val newUser = JSONObject().apply {
             put("email", email)
             put("password", hashPassword(password))
@@ -37,6 +57,7 @@ class PrefsHelper(context: Context) {
                 put("currentAddress", "Dubai, U.A.E")
             })
             put("vehicles", JSONArray())
+            put("bookings", JSONArray())
         }
 
         users.put(newUser)
@@ -53,11 +74,8 @@ class PrefsHelper(context: Context) {
             if (user.getString("email").equals(email, ignoreCase = true) &&
                 user.getString("password") == hashPassword(password)) {
 
-                // Mark user as logged in
                 user.put("isLoggedIn", true)
                 saveUserData(userData)
-
-                // Store current user email in SharedPreferences for quick access
                 sharedPref.edit().putString("CURRENT_USER", email).apply()
                 return true
             }
@@ -100,17 +118,7 @@ class PrefsHelper(context: Context) {
         sharedPref.edit().remove("CURRENT_USER").apply()
     }
 
-    private fun hashPassword(password: String): String {
-        return try {
-            val digest = MessageDigest.getInstance("SHA-256")
-            val hash = digest.digest(password.toByteArray(Charsets.UTF_8))
-            hash.fold("") { str, it -> str + "%02x".format(it) }
-        } catch (e: Exception) {
-            password // Fallback to plain text if hashing fails
-        }
-    }
-
-    // ======================== Location Methods ========================
+    // Location Methods
     fun saveLocation(locationType: String, address: String) {
         val currentUserEmail = getCurrentUserEmail() ?: return
         val userData = loadUserData()
@@ -157,40 +165,7 @@ class PrefsHelper(context: Context) {
     fun getWorkLocation(): String = getUserLocation("workAddress")
     fun getCurrentLocation(): String = getUserLocation("currentAddress", "Dubai, U.A.E")
 
-    private fun saveUserLocation(key: String, address: String) {
-        val currentUserEmail = getCurrentUserEmail() ?: return
-        val userData = loadUserData()
-        val users = userData.getJSONArray("users")
-
-        for (i in 0 until users.length()) {
-            val user = users.getJSONObject(i)
-            if (user.getString("email") == currentUserEmail) {
-                user.getJSONObject("locations").put(key, address)
-                break
-            }
-        }
-        saveUserData(userData)
-    }
-
-    private fun getUserLocation(key: String, default: String = ""): String {
-        return getCurrentUserLocations()?.optString(key, default) ?: default
-    }
-
-    private fun getCurrentUserLocations(): JSONObject? {
-        val currentUserEmail = getCurrentUserEmail() ?: return null
-        val userData = loadUserData()
-        val users = userData.getJSONArray("users")
-
-        for (i in 0 until users.length()) {
-            val user = users.getJSONObject(i)
-            if (user.getString("email") == currentUserEmail) {
-                return user.getJSONObject("locations")
-            }
-        }
-        return null
-    }
-
-    // ======================== Vehicle Methods ========================
+    // Vehicle Methods
     fun saveVehicle(
         type: String,
         brand: String,
@@ -265,6 +240,111 @@ class PrefsHelper(context: Context) {
         saveUserData(userData)
     }
 
+    // Booking Methods
+    fun saveBooking(booking: Booking) {
+        val currentUserEmail = getCurrentUserEmail() ?: return
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                if (!user.has("bookings")) {
+                    user.put("bookings", JSONArray())
+                }
+
+                val bookings = user.getJSONArray("bookings")
+                bookings.put(JSONObject().apply {
+                    put("serviceId", booking.serviceId)
+                    put("serviceName", booking.serviceName)
+                    put("vehicleBrand", booking.vehicleBrand)
+                    put("vehicleModel", booking.vehicleModel)
+                    put("plateNumber", booking.plateNumber)
+                    put("bookingDate", booking.bookingDate)
+                    put("location", booking.location)
+                    put("price", booking.price)
+                    put("bookingTime", booking.bookingTime)
+                })
+                break
+            }
+        }
+        saveUserData(userData)
+    }
+
+    fun getAllBookings(): List<Booking> {
+        val currentUserEmail = getCurrentUserEmail() ?: return emptyList()
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+        val bookings = mutableListOf<Booking>()
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail && user.has("bookings")) {
+                val bookingsArray = user.getJSONArray("bookings")
+                for (j in 0 until bookingsArray.length()) {
+                    val bookingObj = bookingsArray.getJSONObject(j)
+                    bookings.add(Booking(
+                        bookingObj.getString("serviceId"),
+                        bookingObj.getString("serviceName"),
+                        bookingObj.getString("vehicleBrand"),
+                        bookingObj.getString("vehicleModel"),
+                        bookingObj.getString("plateNumber"),
+                        bookingObj.getString("bookingDate"),
+                        bookingObj.getString("location"),
+                        bookingObj.getInt("price"),
+                        bookingObj.getLong("bookingTime")
+                    ))
+                }
+                break
+            }
+        }
+        return bookings.sortedByDescending { it.bookingTime }
+    }
+
+    // Helper Methods
+    private fun hashPassword(password: String): String {
+        return try {
+            val digest = MessageDigest.getInstance("SHA-256")
+            val hash = digest.digest(password.toByteArray(Charsets.UTF_8))
+            hash.fold("") { str, it -> str + "%02x".format(it) }
+        } catch (e: Exception) {
+            password
+        }
+    }
+
+    private fun saveUserLocation(key: String, address: String) {
+        val currentUserEmail = getCurrentUserEmail() ?: return
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                user.getJSONObject("locations").put(key, address)
+                break
+            }
+        }
+        saveUserData(userData)
+    }
+
+    private fun getUserLocation(key: String, default: String = ""): String {
+        return getCurrentUserLocations()?.optString(key, default) ?: default
+    }
+
+    private fun getCurrentUserLocations(): JSONObject? {
+        val currentUserEmail = getCurrentUserEmail() ?: return null
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                return user.getJSONObject("locations")
+            }
+        }
+        return null
+    }
+
     private fun getCurrentUserVehicles(): JSONArray? {
         val currentUserEmail = getCurrentUserEmail() ?: return null
         val userData = loadUserData()
@@ -279,7 +359,6 @@ class PrefsHelper(context: Context) {
         return null
     }
 
-    // ======================== JSON File Operations ========================
     private fun loadUserData(): JSONObject {
         return try {
             val file = File(context.filesDir, USER_DATA_FILE)
@@ -300,14 +379,4 @@ class PrefsHelper(context: Context) {
             e.printStackTrace()
         }
     }
-
-    // ======================== Data Classes ========================
-    data class Vehicle(
-        val type: String,
-        val brand: String,
-        val model: String,
-        val color: String,
-        val chassisNumber: String,
-        val plateNumber: String
-    )
 }

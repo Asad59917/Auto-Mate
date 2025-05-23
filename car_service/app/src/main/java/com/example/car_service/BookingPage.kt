@@ -1,5 +1,6 @@
 package com.example.car_service
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -9,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import java.text.SimpleDateFormat
+import java.util.*
 
 class BookingPage : AppCompatActivity() {
 
@@ -17,6 +20,8 @@ class BookingPage : AppCompatActivity() {
     private lateinit var addLocationBottomSheet: BottomSheetDialog
     private lateinit var vehicleBottomSheet: BottomSheetDialog
     private var selectedVehicleIndex = -1
+    private var selectedDateOption = 1 // 0: Today, 1: Tomorrow, 2: This week, 3: Custom
+    private var selectedDate: Calendar = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,12 +63,107 @@ class BookingPage : AppCompatActivity() {
             bookNow()
         }
 
+        // Initialize date UI
+        updateDateUI()
+
+        // Set click listeners for date options
+        findViewById<CardView>(R.id.cardToday).setOnClickListener {
+            selectedDateOption = 0
+            selectedDate = Calendar.getInstance()
+            updateDateUI()
+        }
+
+        findViewById<CardView>(R.id.cardTomorrow).setOnClickListener {
+            selectedDateOption = 1
+            selectedDate = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
+            updateDateUI()
+        }
+
+        findViewById<CardView>(R.id.cardThisWeek).setOnClickListener {
+            selectedDateOption = 2
+            selectedDate = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 3) } // Example: 3 days later
+            updateDateUI()
+        }
+
+        findViewById<CardView>(R.id.cardCalender).setOnClickListener {
+            showDatePickerDialog()
+        }
+
         // Handle booking logic based on serviceId
         when (serviceId) {
             ServiceConstants.BATTERY_CHANGE -> setupBatteryBooking()
             ServiceConstants.BRAKE_SERVICE -> setupBrakeServiceBooking()
             // Add other services...
         }
+    }
+
+    private fun updateDateUI() {
+        // Reset all options to normal state
+        findViewById<TextView>(R.id.tvToday).apply {
+            setBackgroundResource(R.drawable.bg_date_option_normal)
+            setTextColor(ContextCompat.getColor(this@BookingPage, R.color.gray))
+        }
+        findViewById<TextView>(R.id.tvTomorrow).apply {
+            setBackgroundResource(R.drawable.bg_date_option_normal)
+            setTextColor(ContextCompat.getColor(this@BookingPage, R.color.gray))
+        }
+        findViewById<TextView>(R.id.tvThisWeek).apply {
+            setBackgroundResource(R.drawable.bg_date_option_normal)
+            setTextColor(ContextCompat.getColor(this@BookingPage, R.color.gray))
+        }
+
+        // Highlight selected option
+        when (selectedDateOption) {
+            0 -> findViewById<TextView>(R.id.tvToday).apply {
+                setBackgroundResource(R.drawable.bg_date_option_selected)
+                setTextColor(ContextCompat.getColor(this@BookingPage, R.color.white))
+            }
+            1 -> findViewById<TextView>(R.id.tvTomorrow).apply {
+                setBackgroundResource(R.drawable.bg_date_option_selected)
+                setTextColor(ContextCompat.getColor(this@BookingPage, R.color.white))
+            }
+            2 -> findViewById<TextView>(R.id.tvThisWeek).apply {
+                setBackgroundResource(R.drawable.bg_date_option_selected)
+                setTextColor(ContextCompat.getColor(this@BookingPage, R.color.white))
+            }
+        }
+
+        // Update calendar text based on selection
+        val calendarText = when (selectedDateOption) {
+            0 -> "Today, ${getFormattedDate(selectedDate)}"
+            1 -> "Tomorrow, ${getFormattedDate(selectedDate)}"
+            2 -> "This week, ${getFormattedDate(selectedDate)}"
+            else -> getFullFormattedDate(selectedDate)
+        }
+        findViewById<TextView>(R.id.tvChooseFromCalender).text = calendarText
+    }
+
+    private fun showDatePickerDialog() {
+        val datePicker = DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                selectedDateOption = 3 // Custom date
+                selectedDate = Calendar.getInstance().apply {
+                    set(year, month, day)
+                }
+                updateDateUI()
+            },
+            selectedDate.get(Calendar.YEAR),
+            selectedDate.get(Calendar.MONTH),
+            selectedDate.get(Calendar.DAY_OF_MONTH)
+        )
+
+        // Set minimum date to today
+        datePicker.datePicker.minDate = System.currentTimeMillis() - 1000
+        datePicker.show()
+    }
+
+    private fun getFormattedDate(calendar: Calendar): String {
+        return SimpleDateFormat("EEE, MMM d", Locale.getDefault()).format(calendar.time)
+    }
+
+    private fun getFullFormattedDate(calendar: Calendar): String {
+        return SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault()).format(calendar.time)
     }
 
     private fun setupLocationBottomSheet() {
@@ -340,9 +440,51 @@ class BookingPage : AppCompatActivity() {
             return
         }
 
-        // Proceed with booking
-        Toast.makeText(this, "Booking confirmed!", Toast.LENGTH_SHORT).show()
-        // Add your booking logic here
+        // Get selected vehicle
+        val vehicles = prefsHelper.getAllVehicles()
+        if (selectedVehicleIndex !in vehicles.indices) {
+            Toast.makeText(this, "Invalid vehicle selection", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val selectedVehicle = vehicles[selectedVehicleIndex]
+
+        // Get service details from intent
+        val serviceId = intent.getStringExtra("service_id") ?: ""
+        val serviceName = intent.getStringExtra("service_name") ?: "Service"
+        val basePrice = intent.getIntExtra("base_price", 0)
+
+        // Get selected date and location
+        val selectedDateText = findViewById<TextView>(R.id.tvChooseFromCalender).text.toString()
+        val selectedLocation = findViewById<TextView>(R.id.tvHomeAddress).text.toString()
+
+        // Create booking object
+        val booking = PrefsHelper.Booking(
+            serviceId = serviceId,
+            serviceName = serviceName,
+            vehicleBrand = selectedVehicle.brand,
+            vehicleModel = selectedVehicle.model,
+            plateNumber = selectedVehicle.plateNumber,
+            bookingDate = selectedDateText,
+            location = selectedLocation,
+            price = basePrice
+        )
+
+        // Save booking
+        prefsHelper.saveBooking(booking)
+
+        // Show confirmation and navigate
+        Toast.makeText(this, "Booking confirmed for $selectedDateText", Toast.LENGTH_SHORT).show()
+
+        // Navigate to booking confirmation screen
+        val intent = Intent(this, BookingConfirmationActivity::class.java).apply {
+            putExtra("booking_date", selectedDateText)
+            putExtra("vehicle_info", "${selectedVehicle.brand} ${selectedVehicle.model} (${selectedVehicle.plateNumber})")
+            putExtra("service_name", serviceName)
+            putExtra("location", selectedLocation)
+            putExtra("price", basePrice)
+        }
+        startActivity(intent)
+        finish()
     }
 
     private fun setupBatteryBooking() {
