@@ -19,6 +19,8 @@ class BookingPage : AppCompatActivity() {
     private lateinit var locationBottomSheet: BottomSheetDialog
     private lateinit var addLocationBottomSheet: BottomSheetDialog
     private lateinit var vehicleBottomSheet: BottomSheetDialog
+    private lateinit var bookingConfirmationBottomSheet: BottomSheetDialog
+    private lateinit var bookingSuccessBottomSheet: BottomSheetDialog
     private var selectedVehicleIndex = -1
     private var selectedDateOption = 1 // 0: Today, 1: Tomorrow, 2: This week, 3: Custom
     private var selectedDate: Calendar = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
@@ -43,6 +45,8 @@ class BookingPage : AppCompatActivity() {
         setupLocationBottomSheet()
         setupAddLocationBottomSheet()
         setupVehicleBottomSheet()
+        setupBookingConfirmationBottomSheet()
+        setupBookingSuccessBottomSheet()
 
         // Set click listeners
         findViewById<CardView>(R.id.cardSelectVehicle).setOnClickListener {
@@ -60,7 +64,7 @@ class BookingPage : AppCompatActivity() {
 
         // Set book now button click listener
         findViewById<CardView>(R.id.cardBookNow).setOnClickListener {
-            bookNow()
+            showBookingConfirmation()
         }
 
         // Initialize date UI
@@ -96,6 +100,129 @@ class BookingPage : AppCompatActivity() {
             // Add other services...
         }
     }
+
+    private fun setupBookingConfirmationBottomSheet() {
+        bookingConfirmationBottomSheet = BottomSheetDialog(this)
+        val confirmationView = layoutInflater.inflate(R.layout.booking_confirmation_bottom_sheet, null)
+        bookingConfirmationBottomSheet.setContentView(confirmationView)
+
+        // Get references to views
+        val btnCancelBooking = confirmationView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancelBooking)
+        val btnConfirmBooking = confirmationView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmBooking)
+
+        // Set click listeners
+        btnCancelBooking.setOnClickListener {
+            bookingConfirmationBottomSheet.dismiss()
+        }
+
+        btnConfirmBooking.setOnClickListener {
+            bookingConfirmationBottomSheet.dismiss()
+            confirmBooking()
+        }
+
+        // Make it non-cancelable by touch outside
+        bookingConfirmationBottomSheet.setCanceledOnTouchOutside(false)
+    }
+
+    private fun setupBookingSuccessBottomSheet() {
+        bookingSuccessBottomSheet = BottomSheetDialog(this)
+        val successView = layoutInflater.inflate(R.layout.booking_success_bottom_sheet, null)
+        bookingSuccessBottomSheet.setContentView(successView)
+
+        // Get reference to done button
+        val btnDoneBooking = successView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnDoneBooking)
+
+        // Set click listener
+        btnDoneBooking.setOnClickListener {
+            bookingSuccessBottomSheet.dismiss()
+            // Navigate back to main activity or finish this activity
+            finish()
+        }
+
+        // Make it non-cancelable by touch outside
+        bookingSuccessBottomSheet.setCanceledOnTouchOutside(false)
+    }
+
+    private fun showBookingConfirmation() {
+        // Validate selections
+        if (selectedVehicleIndex == -1) {
+            Toast.makeText(this, "Please select a vehicle", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (findViewById<TextView>(R.id.tvHomeAddress).text.isNullOrEmpty()) {
+            Toast.makeText(this, "Please select a location", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Get selected vehicle
+        val vehicles = prefsHelper.getAllVehicles()
+        if (selectedVehicleIndex !in vehicles.indices) {
+            Toast.makeText(this, "Invalid vehicle selection", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val selectedVehicle = vehicles[selectedVehicleIndex]
+
+        // Get service details from intent
+        val serviceName = intent.getStringExtra("service_name") ?: "Service"
+        val basePrice = intent.getIntExtra("base_price", 0)
+
+        // Get selected date and location
+        val selectedDateText = findViewById<TextView>(R.id.tvChooseFromCalender).text.toString()
+        val selectedLocation = findViewById<TextView>(R.id.tvHomeAddress).text.toString()
+
+        // Update confirmation dialog with booking details
+        val confirmationView = bookingConfirmationBottomSheet.findViewById<View>(android.R.id.content)
+        confirmationView?.let { view ->
+            view.findViewById<TextView>(R.id.tvConfirmServiceName)?.text = serviceName
+            view.findViewById<TextView>(R.id.tvConfirmVehicle)?.text = "${selectedVehicle.brand} ${selectedVehicle.model} (${selectedVehicle.plateNumber})"
+            view.findViewById<TextView>(R.id.tvConfirmDate)?.text = selectedDateText
+            view.findViewById<TextView>(R.id.tvConfirmLocation)?.text = selectedLocation
+            view.findViewById<TextView>(R.id.tvConfirmPrice)?.text = "AED $basePrice"
+        }
+
+        // Show confirmation dialog
+        bookingConfirmationBottomSheet.show()
+    }
+
+    private fun confirmBooking() {
+        // Get selected vehicle
+        val vehicles = prefsHelper.getAllVehicles()
+        val selectedVehicle = vehicles[selectedVehicleIndex]
+
+        // Get service details from intent
+        val serviceId = intent.getStringExtra("service_id") ?: ""
+        val serviceName = intent.getStringExtra("service_name") ?: "Service"
+        val basePrice = intent.getIntExtra("base_price", 0)
+
+        // Get selected date and location
+        val selectedDateText = findViewById<TextView>(R.id.tvChooseFromCalender).text.toString()
+        val selectedLocation = findViewById<TextView>(R.id.tvHomeAddress).text.toString()
+
+        // Create booking object
+        val booking = PrefsHelper.Booking(
+            serviceId = serviceId,
+            serviceName = serviceName,
+            vehicleBrand = selectedVehicle.brand,
+            vehicleModel = selectedVehicle.model,
+            plateNumber = selectedVehicle.plateNumber,
+            bookingDate = selectedDateText,
+            location = selectedLocation,
+            price = basePrice
+        )
+
+        // Save booking
+        prefsHelper.saveBooking(booking)
+
+        // Show success dialog
+        showBookingSuccess()
+    }
+
+    private fun showBookingSuccess() {
+        bookingSuccessBottomSheet.show()
+    }
+
+    // ... (rest of the existing methods remain the same)
 
     private fun updateDateUI() {
         // Reset all options to normal state
@@ -428,65 +555,6 @@ class BookingPage : AppCompatActivity() {
         addLocationBottomSheet.show()
     }
 
-    private fun bookNow() {
-        // Validate selections
-        if (selectedVehicleIndex == -1) {
-            Toast.makeText(this, "Please select a vehicle", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (findViewById<TextView>(R.id.tvHomeAddress).text.isNullOrEmpty()) {
-            Toast.makeText(this, "Please select a location", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Get selected vehicle
-        val vehicles = prefsHelper.getAllVehicles()
-        if (selectedVehicleIndex !in vehicles.indices) {
-            Toast.makeText(this, "Invalid vehicle selection", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val selectedVehicle = vehicles[selectedVehicleIndex]
-
-        // Get service details from intent
-        val serviceId = intent.getStringExtra("service_id") ?: ""
-        val serviceName = intent.getStringExtra("service_name") ?: "Service"
-        val basePrice = intent.getIntExtra("base_price", 0)
-
-        // Get selected date and location
-        val selectedDateText = findViewById<TextView>(R.id.tvChooseFromCalender).text.toString()
-        val selectedLocation = findViewById<TextView>(R.id.tvHomeAddress).text.toString()
-
-        // Create booking object
-        val booking = PrefsHelper.Booking(
-            serviceId = serviceId,
-            serviceName = serviceName,
-            vehicleBrand = selectedVehicle.brand,
-            vehicleModel = selectedVehicle.model,
-            plateNumber = selectedVehicle.plateNumber,
-            bookingDate = selectedDateText,
-            location = selectedLocation,
-            price = basePrice
-        )
-
-        // Save booking
-        prefsHelper.saveBooking(booking)
-
-        // Show confirmation and navigate
-        Toast.makeText(this, "Booking confirmed for $selectedDateText", Toast.LENGTH_SHORT).show()
-
-        // Navigate to booking confirmation screen
-        val intent = Intent(this, BookingConfirmationActivity::class.java).apply {
-            putExtra("booking_date", selectedDateText)
-            putExtra("vehicle_info", "${selectedVehicle.brand} ${selectedVehicle.model} (${selectedVehicle.plateNumber})")
-            putExtra("service_name", serviceName)
-            putExtra("location", selectedLocation)
-            putExtra("price", basePrice)
-        }
-        startActivity(intent)
-        finish()
-    }
-
     private fun setupBatteryBooking() {
         // Battery-specific setup
     }
@@ -499,6 +567,10 @@ class BookingPage : AppCompatActivity() {
 
     override fun onBackPressed() {
         when {
+            this::bookingSuccessBottomSheet.isInitialized && bookingSuccessBottomSheet.isShowing ->
+                bookingSuccessBottomSheet.dismiss()
+            this::bookingConfirmationBottomSheet.isInitialized && bookingConfirmationBottomSheet.isShowing ->
+                bookingConfirmationBottomSheet.dismiss()
             this::locationBottomSheet.isInitialized && locationBottomSheet.isShowing ->
                 locationBottomSheet.dismiss()
             this::addLocationBottomSheet.isInitialized && addLocationBottomSheet.isShowing ->
