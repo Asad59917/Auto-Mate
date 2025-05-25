@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity() {
 
@@ -201,7 +202,7 @@ class MainActivity : AppCompatActivity() {
 
         val cancelButton = vehicleView.findViewById<TextView>(R.id.cancelButton)
         val addNewButton = vehicleView.findViewById<TextView>(R.id.addNewButton)
-        val selectButton = vehicleView.findViewById<CardView>(R.id.selectButton)
+        val selectButton = vehicleView.findViewById<MaterialButton>(R.id.selectButton)
         val vehicleListContainer = vehicleView.findViewById<LinearLayout>(R.id.vehicleListContainer)
         val emptyStateView = vehicleView.findViewById<TextView>(R.id.emptyStateText)
 
@@ -225,12 +226,10 @@ class MainActivity : AppCompatActivity() {
                     vehicleItemView.findViewById<TextView>(R.id.vehiclePlate).text = vehicle.plateNumber
 
 
-                    // Highlight selected vehicle
                     if (index == selectedVehicleIndex) {
-                        vehicleItemView.setBackgroundColor(
-                            ContextCompat.getColor(this, R.color.selected_item_background)
-                        )
+                        vehicleItemView.setBackgroundResource(R.drawable.selected_vehicle_background)
                     }
+
 
                     vehicleItemView.setOnClickListener {
                         selectedVehicleIndex = index

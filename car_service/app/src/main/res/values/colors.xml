@@ -21,7 +21,8 @@
     <color name="light_gray">#F5F5F5</color>
     <color name="value_text_color">#000000</color>
     <color name="light_gray_bg">#FFF0F0F0</color>
-    <color name="selected_item_background">#11000000</color>
+    <color name="selected_item_background">#EFEFEF</color>
+    <color name="Not_selected_item_background">#A6B4FB</color>
     <color name="divider_gray">#EEEEEE</color>
     <color name="gray">#757575</color>
 
