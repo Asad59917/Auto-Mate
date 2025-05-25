@@ -20,9 +20,9 @@ class cartowing : AppCompatActivity() {
 
         findViewById<MaterialButton>(R.id.btnRoadSideCallNow).setOnClickListener {
             val intent = Intent(this, BookingPage::class.java).apply {
-                putExtra("service_id", ServiceConstants.ROAD_ASSISTANCE)
+                putExtra("service_id", ServiceConstants.CAR_TOWING)
                 putExtra("service_name", "Roadside Assistance")
-                putExtra("base_price", ServiceConstants.ROAD_ASSISTANCE_PRICE)
+                putExtra("base_price", ServiceConstants.CAR_TOWING_PRICE)
             }
             startActivity(intent)
         }
