@@ -30,4 +30,8 @@ object ServiceConstants {
     const val TIRE_CHANGE_NAME = "Tire Change"
     const val BATTERY_CHANGE_NAME = "Battery Change"
     const val SERVICE_CONTRACT_NAME = "Service Contract"
+
+    const val FUEL_SPECIAL = "fuel_special"
+    const val FUEL_SUPER = "fuel_super"
+    const val FUEL_DIESEL = "fuel_diesel"
 }

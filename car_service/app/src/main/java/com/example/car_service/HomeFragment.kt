@@ -389,6 +389,8 @@ class HomeFragment : Fragment() {
             "Tire Change" -> Intent(requireContext(), TireChangeServicePage::class.java)
             "Battery Change" -> Intent(requireContext(), BatteryChangeServicePage::class.java)
             "Service Contract" -> Intent(requireContext(), ServiceContractPage::class.java)
+            "Fuel Up" -> Intent(requireContext(), FuelUPPage::class.java)
+
             else -> null
         }
         intent?.let { startActivity(it) }
