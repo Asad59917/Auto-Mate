@@ -569,7 +569,7 @@ class BookingPage : AppCompatActivity() {
         }
     }
 
-    private fun updateSelectedVehicle(vehicle: PrefsHelper.Vehicle) {
+    private fun updateSelectedVehicle(vehicle: Vehicle) {
         try {
             findViewById<TextView>(R.id.tvVehicleName)?.text = "${vehicle.brand} ${vehicle.model}"
             findViewById<TextView>(R.id.tvVehicleNumber)?.text = vehicle.plateNumber
@@ -590,25 +590,41 @@ class BookingPage : AppCompatActivity() {
 
     private fun updateDateUI() {
         try {
-            // Reset all options to normal state (with null checks)
-            findViewById<TextView>(R.id.tvToday)?.apply {
-                setTextColor(ContextCompat.getColor(this@BookingPage, android.R.color.darker_gray))
-            }
-            findViewById<TextView>(R.id.tvTomorrow)?.apply {
-                setTextColor(ContextCompat.getColor(this@BookingPage, android.R.color.darker_gray))
-            }
-            findViewById<TextView>(R.id.tvThisWeek)?.apply {
-                setTextColor(ContextCompat.getColor(this@BookingPage, android.R.color.darker_gray))
+            // Get references to all date option TextViews
+            val tvToday = findViewById<TextView>(R.id.tvToday)
+            val tvTomorrow = findViewById<TextView>(R.id.tvTomorrow)
+            val tvThisWeek = findViewById<TextView>(R.id.tvThisWeek)
+
+            // Reset all options to normal state
+            tvToday?.apply {
+                background = ContextCompat.getDrawable(this@BookingPage, R.drawable.bg_date_option_normal)
+                setTextColor(ContextCompat.getColor(this@BookingPage, R.color.gray))
             }
 
-            // Highlight selected option
+            tvTomorrow?.apply {
+                background = ContextCompat.getDrawable(this@BookingPage, R.drawable.bg_date_option_normal)
+                setTextColor(ContextCompat.getColor(this@BookingPage, R.color.gray))
+            }
+
+            tvThisWeek?.apply {
+                background = ContextCompat.getDrawable(this@BookingPage, R.drawable.bg_date_option_normal)
+                setTextColor(ContextCompat.getColor(this@BookingPage, R.color.gray))
+            }
+
+            // Apply selected state to the chosen option
             when (selectedDateOption) {
-                0 -> findViewById<TextView>(R.id.tvToday)?.setTextColor(
-                    ContextCompat.getColor(this, android.R.color.holo_blue_dark))
-                1 -> findViewById<TextView>(R.id.tvTomorrow)?.setTextColor(
-                    ContextCompat.getColor(this, android.R.color.holo_blue_dark))
-                2 -> findViewById<TextView>(R.id.tvThisWeek)?.setTextColor(
-                    ContextCompat.getColor(this, android.R.color.holo_blue_dark))
+                0 -> tvToday?.apply {
+                    background = ContextCompat.getDrawable(this@BookingPage, R.drawable.bg_date_option_selected)
+                    setTextColor(ContextCompat.getColor(this@BookingPage, R.color.white))
+                }
+                1 -> tvTomorrow?.apply {
+                    background = ContextCompat.getDrawable(this@BookingPage, R.drawable.bg_date_option_selected)
+                    setTextColor(ContextCompat.getColor(this@BookingPage, R.color.white))
+                }
+                2 -> tvThisWeek?.apply {
+                    background = ContextCompat.getDrawable(this@BookingPage, R.drawable.bg_date_option_selected)
+                    setTextColor(ContextCompat.getColor(this@BookingPage, R.color.white))
+                }
             }
 
             // Update calendar text based on selection

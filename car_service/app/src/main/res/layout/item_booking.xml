@@ -19,7 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="12dp"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/tvServiceName"
@@ -94,7 +95,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
 
             <ImageView
                 android:layout_width="16dp"
@@ -113,19 +115,48 @@
 
         </LinearLayout>
 
-        <!-- Status Badge -->
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
+        <!-- Bottom Row with Status and Cancel Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/status_badge_background"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"
-            android:text="BOOKED"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Status Badge -->
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/status_badge_background"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"
+                android:text="BOOKED"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- Spacer -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <!-- Cancel Button -->
+            <TextView
+                android:id="@+id/btnCancelBooking"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel"
+                android:textColor="#FF5722"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"
+                android:background="@drawable/cancel_button_background"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

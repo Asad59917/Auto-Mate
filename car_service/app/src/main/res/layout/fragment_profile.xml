@@ -175,9 +175,13 @@
 
         <!-- Terms & Conditions -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/cvTermsConditions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
             app:cardBackgroundColor="@android:color/white"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
@@ -199,11 +203,18 @@
                     app:tint="#9E9E9E" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Terms &amp; Conditions"
                     android:textColor="#2C2C2C"
                     android:textSize="16sp" />
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_arrow_right"
+                    app:tint="#9E9E9E" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -214,6 +225,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
             app:cardBackgroundColor="@android:color/white"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp"

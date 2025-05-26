@@ -1,14 +1,19 @@
 package com.example.car_service
 
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Gravity
+import android.view.WindowManager
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Button
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 
 class ProfileFragment : Fragment() {
 
@@ -18,6 +23,7 @@ class ProfileFragment : Fragment() {
     private lateinit var tvUserEmail: TextView
     private lateinit var backButton: ImageButton
     private lateinit var cvSignOut: CardView
+    private lateinit var cvTermsConditions: CardView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,6 +54,7 @@ class ProfileFragment : Fragment() {
         tvUserEmail = view.findViewById(R.id.tvUserEmail)
         backButton = view.findViewById(R.id.backButton)
         cvSignOut = view.findViewById(R.id.cvSignOut)
+        cvTermsConditions = view.findViewById(R.id.cvTermsConditions)
     }
 
     private fun loadUserData() {
@@ -97,24 +104,61 @@ class ProfileFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        // Sign out click
+        // Terms & Conditions click
+        cvTermsConditions.setOnClickListener {
+            startActivity(Intent(requireContext(), TermsConditionsActivity::class.java))
+        }
+
+        // Sign out click - show confirmation dialog
         cvSignOut.setOnClickListener {
+            showSignOutDialog()
+        }
+    }
+
+    private fun showSignOutDialog() {
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(R.layout.dialog_signout_confirmation)
+
+        // Configure dialog window
+        val window = dialog.window
+        window?.let {
+            it.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            it.setGravity(Gravity.BOTTOM)
+            it.setWindowAnimations(R.style.DialogSlideAnimation)
+
+            // Set background to transparent for rounded corners
+            it.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), android.R.color.transparent))
+
+            // Add margin from edges
+            val layoutParams = it.attributes
+            layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
+            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
+            it.attributes = layoutParams
+        }
+
+        // Find views in dialog
+        val btnYes = dialog.findViewById<Button>(R.id.btnYes)
+        val btnNo = dialog.findViewById<Button>(R.id.btnNo)
+
+        // Set click listeners
+        btnYes.setOnClickListener {
+            dialog.dismiss()
             signOut()
         }
+
+        btnNo.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        // Show dialog
+        dialog.show()
     }
 
     private fun signOut() {
         prefsHelper.logout()
 
-        // Navigate to login screen or main activity
-        // You can implement your navigation logic here
-        // For example:
-        // findNavController().navigate(R.id.action_profileFragment_to_loginFragment)
-        // or
-         startActivity(Intent(requireContext(), SignInActivity::class.java))
-        // requireActivity().finish()
-
-        // For now, just go back
-        parentFragmentManager.popBackStack()
+        // Navigate to login screen
+        startActivity(Intent(requireContext(), SignInActivity::class.java))
+        requireActivity().finish()
     }
 }

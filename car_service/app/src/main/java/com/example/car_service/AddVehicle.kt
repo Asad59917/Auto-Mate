@@ -18,6 +18,14 @@ class AddVehicleActivity : AppCompatActivity() {
     private lateinit var vehicleTypeTextViews: List<TextView>
     private lateinit var selectionIndicator: MaterialCardView
 
+    // Vehicle type to icon mapping
+    private val vehicleIcons = mapOf(
+        "Car" to R.drawable.ic_car,
+        "Motorcycle" to R.drawable.ic_motorcycle,
+        "Boat" to R.drawable.ic_boat,
+        "Other" to R.drawable.ic_other_vehicle
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddVehicleBinding.inflate(layoutInflater)
@@ -164,5 +172,10 @@ class AddVehicleActivity : AppCompatActivity() {
             Toast.makeText(this, "Vehicle saved successfully", Toast.LENGTH_SHORT).show()
             finish()
         }
+    }
+
+    // Helper function to get vehicle icon resource ID
+    fun getVehicleIconResource(vehicleType: String): Int {
+        return vehicleIcons[vehicleType] ?: R.drawable.ic_other_vehicle
     }
 }

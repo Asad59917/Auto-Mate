@@ -12,16 +12,7 @@ class PrefsHelper(context: Context) {
     private val sharedPref: SharedPreferences = context.getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE)
     private val USER_DATA_FILE = "user_data.json"
 
-    // Data classes
-    data class Vehicle(
-        val type: String,
-        val brand: String,
-        val model: String,
-        val color: String,
-        val chassisNumber: String,
-        val plateNumber: String
-    )
-
+    // Data class for Booking (keeping this as it's specific to PrefsHelper)
     data class Booking(
         val serviceId: String,
         val serviceName: String,
@@ -165,7 +156,18 @@ class PrefsHelper(context: Context) {
     fun getWorkLocation(): String = getUserLocation("workAddress")
     fun getCurrentLocation(): String = getUserLocation("currentAddress", "Dubai, U.A.E")
 
-    // Vehicle Methods
+    // Vehicle Methods - Updated to work with Vehicle data class from VehicleListHelper
+    fun saveVehicle(vehicle: Vehicle) {
+        saveVehicle(
+            type = vehicle.type,
+            brand = vehicle.brand,
+            model = vehicle.model,
+            color = vehicle.color,
+            chassisNumber = vehicle.chassisNumber,
+            plateNumber = vehicle.plateNumber
+        )
+    }
+
     fun saveVehicle(
         type: String,
         brand: String,
@@ -206,12 +208,13 @@ class PrefsHelper(context: Context) {
 
         val vehicleObj = vehicles.getJSONObject(index)
         return Vehicle(
-            vehicleObj.getString("type"),
-            vehicleObj.getString("brand"),
-            vehicleObj.getString("model"),
-            vehicleObj.optString("color", ""),
-            vehicleObj.optString("chassisNumber", ""),
-            vehicleObj.getString("plateNumber")
+            type = vehicleObj.getString("type"),
+            brand = vehicleObj.getString("brand"),
+            model = vehicleObj.getString("model"),
+            color = vehicleObj.optString("color", ""),
+            chassisNumber = vehicleObj.optString("chassisNumber", ""),
+            plateNumber = vehicleObj.getString("plateNumber"),
+            isSelected = false // Default to not selected when loading from preferences
         )
     }
 
@@ -221,6 +224,18 @@ class PrefsHelper(context: Context) {
 
         for (i in 0 until count) {
             getVehicle(i)?.let { vehicles.add(it) }
+        }
+        return vehicles
+    }
+
+    fun getAllVehiclesWithSelection(selectedPlateNumber: String? = null): List<Vehicle> {
+        val vehicles = mutableListOf<Vehicle>()
+        val count = getVehicleCount()
+
+        for (i in 0 until count) {
+            getVehicle(i)?.let { vehicle ->
+                vehicles.add(vehicle.copy(isSelected = vehicle.plateNumber == selectedPlateNumber))
+            }
         }
         return vehicles
     }
@@ -299,6 +314,41 @@ class PrefsHelper(context: Context) {
             }
         }
         return bookings.sortedByDescending { it.bookingTime }
+    }
+
+    // Cancel booking method
+    fun cancelBooking(bookingToCancel: Booking): Boolean {
+        val currentUserEmail = getCurrentUserEmail() ?: return false
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail && user.has("bookings")) {
+                val bookings = user.getJSONArray("bookings")
+
+                // Find and remove the booking
+                for (j in bookings.length() - 1 downTo 0) {
+                    val booking = bookings.getJSONObject(j)
+                    if (booking.getString("serviceId") == bookingToCancel.serviceId &&
+                        booking.getString("plateNumber") == bookingToCancel.plateNumber &&
+                        booking.getLong("bookingTime") == bookingToCancel.bookingTime) {
+
+                        bookings.remove(j)
+                        saveUserData(userData)
+                        return true
+                    }
+                }
+                break
+            }
+        }
+        return false
+    }
+
+    // Get booking by index (useful for list operations)
+    fun getBookingByIndex(index: Int): Booking? {
+        val allBookings = getAllBookings()
+        return if (index in 0 until allBookings.size) allBookings[index] else null
     }
 
     // Helper Methods
