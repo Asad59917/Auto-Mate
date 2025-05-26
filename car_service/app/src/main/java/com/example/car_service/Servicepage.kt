@@ -19,16 +19,12 @@ class Servicepage : AppCompatActivity() {
 
         // Set click listener
         btnBookNow.setOnClickListener {
-            // Create an intent to start the BookingActivity
-            val intent = Intent(this, BookingPage::class.java)
-
-            // You can pass any extra data if needed
-            intent.putExtra("service_name", "Engine oil change")
-            intent.putExtra("base_price", 100)
-
+            val intent = Intent(this, BookingPage::class.java).apply {
+                putExtra("service_id", "engine_oil_change") // Add this line
+                putExtra("service_name", "Engine oil change")
+                putExtra("base_price", 100)
+            }
             startActivity(intent)
-
-            // Optional: Add a transition animation
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 

@@ -398,13 +398,16 @@ class HomeFragment : Fragment() {
 
     private fun setupSpecialOffers() {
         view?.findViewById<CardView>(R.id.oilChangeOffer)?.setOnClickListener {
-            Toast.makeText(requireContext(), "Oil change offer clicked", Toast.LENGTH_SHORT).show()
+            val intent = Intent(requireContext(), Servicepage::class.java)
+            startActivity(intent)
         }
 
         view?.findViewById<CardView>(R.id.carWashOffer)?.setOnClickListener {
-            Toast.makeText(requireContext(), "Car wash offer clicked", Toast.LENGTH_SHORT).show()
+            val intent = Intent(requireContext(),CarWashServicePage::class.java)
+            startActivity(intent)
         }
     }
+
 
     private fun Int.dpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 }

@@ -13,6 +13,9 @@
         android:theme="@style/Theme.Car_service"
         tools:targetApi="31">
         <activity
+            android:name=".SignInActivity"
+            android:exported="false" />
+        <activity
             android:name=".FuelUPPage"
             android:exported="false" />
         <activity
@@ -22,10 +25,10 @@
             android:name=".BookingPage"
             android:exported="false" />
         <activity
-            android:name=".SignInActivity"
+            android:name=".MainActivity"
             android:exported="false" /> <!-- Sign In Activity (Now the launcher) -->
         <activity
-            android:name=".MainActivity"
+            android:name=".SplashActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
