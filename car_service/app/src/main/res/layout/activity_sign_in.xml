@@ -149,6 +149,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="25dp"
             android:text="Forget password?"
+            android:visibility="gone"
             android:textColor="#212121"
             android:textSize="14sp" />
     </LinearLayout>
