@@ -18,14 +18,30 @@ class SignInActivity : AppCompatActivity() {
 
         prefsHelper = PrefsHelper(this)
 
+        // Check if user can auto-login (more secure approach)
+        if (prefsHelper.canAutoLogin()) {
+            navigateToMainActivity()
+            return
+        }
+
+        // Load remembered email if available
+        loadRememberedEmail()
+
         binding.signInButton.setOnClickListener {
             val email = binding.emailInput.text.toString().trim()
             val password = binding.passwordInput.text.toString().trim()
+            val rememberMe = binding.rememberMeSwitch.isChecked
 
             if (validateInputs(email, password)) {
                 if (prefsHelper.loginUser(email, password)) {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
+                    // Handle remember me functionality
+                    if (rememberMe) {
+                        prefsHelper.saveRememberMe(email)
+                    } else {
+                        prefsHelper.clearRememberMe()
+                    }
+
+                    navigateToMainActivity()
                 } else {
                     Toast.makeText(
                         this,
@@ -39,6 +55,19 @@ class SignInActivity : AppCompatActivity() {
         binding.signUpLink.setOnClickListener {
             startActivity(Intent(this, SignUpActivity::class.java))
         }
+    }
+
+    private fun loadRememberedEmail() {
+        val rememberedEmail = prefsHelper.getRememberedEmail()
+        if (rememberedEmail != null) {
+            binding.emailInput.setText(rememberedEmail)
+            binding.rememberMeSwitch.isChecked = true
+        }
+    }
+
+    private fun navigateToMainActivity() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 
     private fun validateInputs(email: String, password: String): Boolean {

@@ -9,9 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Gravity
 import android.view.WindowManager
-import android.widget.ImageButton
-import android.widget.TextView
-import android.widget.Button
+import android.widget.*
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 
@@ -24,6 +22,8 @@ class ProfileFragment : Fragment() {
     private lateinit var backButton: ImageButton
     private lateinit var cvSignOut: CardView
     private lateinit var cvTermsConditions: CardView
+    private lateinit var cvChangeName: CardView
+    private lateinit var cvChangePassword: CardView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,22 +55,29 @@ class ProfileFragment : Fragment() {
         backButton = view.findViewById(R.id.backButton)
         cvSignOut = view.findViewById(R.id.cvSignOut)
         cvTermsConditions = view.findViewById(R.id.cvTermsConditions)
+        cvChangeName = view.findViewById(R.id.cvChangeName)
+        cvChangePassword = view.findViewById(R.id.cvChangePassword)
     }
 
     private fun loadUserData() {
         val userEmail = prefsHelper.getCurrentUserEmail()
+        val userName = prefsHelper.getCurrentUserName()
 
         if (userEmail != null) {
             // Set email
             tvUserEmail.text = userEmail
 
-            // Extract name from email (before @ symbol) and format it
-            val nameFromEmail = userEmail.substringBefore("@")
-            val formattedName = formatName(nameFromEmail)
+            // Use actual name if available, otherwise fallback to formatted email
+            val displayName = if (!userName.isNullOrEmpty()) {
+                userName
+            } else {
+                // Fallback to formatted email for existing users who don't have fullName
+                formatName(userEmail.substringBefore("@"))
+            }
 
             // Set name in both profile section and details
-            tvProfileName.text = formattedName
-            tvUserName.text = formattedName
+            tvProfileName.text = displayName
+            tvUserName.text = displayName
         } else {
             // Fallback if no user is logged in
             tvProfileName.text = "Guest User"
@@ -109,10 +116,120 @@ class ProfileFragment : Fragment() {
             startActivity(Intent(requireContext(), TermsConditionsActivity::class.java))
         }
 
+        // Change Name click
+        cvChangeName.setOnClickListener {
+            showChangeNameDialog()
+        }
+
+        // Change Password click
+        cvChangePassword.setOnClickListener {
+            showChangePasswordDialog()
+        }
+
         // Sign out click - show confirmation dialog
         cvSignOut.setOnClickListener {
             showSignOutDialog()
         }
+    }
+
+    private fun showChangeNameDialog() {
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(R.layout.dialog_change_name)
+
+        // Configure dialog window
+        configureDialogWindow(dialog)
+
+        // Find views in dialog
+        val etNewName = dialog.findViewById<EditText>(R.id.etNewName)
+        val btnSave = dialog.findViewById<Button>(R.id.btnSave)
+        val btnCancel = dialog.findViewById<Button>(R.id.btnCancel)
+
+        // Pre-fill current name
+        val currentName = prefsHelper.getCurrentUserName()
+        if (!currentName.isNullOrEmpty()) {
+            etNewName.setText(currentName)
+            etNewName.setSelection(currentName.length)
+        }
+
+        // Set click listeners
+        btnSave.setOnClickListener {
+            val newName = etNewName.text.toString().trim()
+            if (newName.isNotEmpty()) {
+                if (prefsHelper.updateUserName(newName)) {
+                    Toast.makeText(requireContext(), "Name updated successfully", Toast.LENGTH_SHORT).show()
+                    loadUserData() // Refresh the displayed data
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(requireContext(), "Failed to update name", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(requireContext(), "Please enter a valid name", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showChangePasswordDialog() {
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(R.layout.dialog_change_password)
+
+        // Configure dialog window
+        configureDialogWindow(dialog)
+
+        // Find views in dialog
+        val etCurrentPassword = dialog.findViewById<EditText>(R.id.etCurrentPassword)
+        val etNewPassword = dialog.findViewById<EditText>(R.id.etNewPassword)
+        val etConfirmPassword = dialog.findViewById<EditText>(R.id.etConfirmPassword)
+        val btnSave = dialog.findViewById<Button>(R.id.btnSave)
+        val btnCancel = dialog.findViewById<Button>(R.id.btnCancel)
+
+        // Set click listeners
+        btnSave.setOnClickListener {
+            val currentPassword = etCurrentPassword.text.toString()
+            val newPassword = etNewPassword.text.toString()
+            val confirmPassword = etConfirmPassword.text.toString()
+
+            when {
+                currentPassword.isEmpty() -> {
+                    Toast.makeText(requireContext(), "Please enter your current password", Toast.LENGTH_SHORT).show()
+                }
+                newPassword.isEmpty() -> {
+                    Toast.makeText(requireContext(), "Please enter a new password", Toast.LENGTH_SHORT).show()
+                }
+                newPassword.length < 6 -> {
+                    Toast.makeText(requireContext(), "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                }
+                newPassword != confirmPassword -> {
+                    Toast.makeText(requireContext(), "Passwords do not match", Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    val result = prefsHelper.updateUserPassword(currentPassword, newPassword)
+                    when (result) {
+                        PrefsHelper.PasswordUpdateResult.SUCCESS -> {
+                            Toast.makeText(requireContext(), "Password updated successfully", Toast.LENGTH_SHORT).show()
+                            dialog.dismiss()
+                        }
+                        PrefsHelper.PasswordUpdateResult.WRONG_CURRENT_PASSWORD -> {
+                            Toast.makeText(requireContext(), "Current password is incorrect", Toast.LENGTH_SHORT).show()
+                        }
+                        PrefsHelper.PasswordUpdateResult.ERROR -> {
+                            Toast.makeText(requireContext(), "Failed to update password", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun showSignOutDialog() {
@@ -120,21 +237,7 @@ class ProfileFragment : Fragment() {
         dialog.setContentView(R.layout.dialog_signout_confirmation)
 
         // Configure dialog window
-        val window = dialog.window
-        window?.let {
-            it.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            it.setGravity(Gravity.BOTTOM)
-            it.setWindowAnimations(R.style.DialogSlideAnimation)
-
-            // Set background to transparent for rounded corners
-            it.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), android.R.color.transparent))
-
-            // Add margin from edges
-            val layoutParams = it.attributes
-            layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
-            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
-            it.attributes = layoutParams
-        }
+        configureDialogWindow(dialog)
 
         // Find views in dialog
         val btnYes = dialog.findViewById<Button>(R.id.btnYes)
@@ -150,8 +253,25 @@ class ProfileFragment : Fragment() {
             dialog.dismiss()
         }
 
-        // Show dialog
         dialog.show()
+    }
+
+    private fun configureDialogWindow(dialog: Dialog) {
+        val window = dialog.window
+        window?.let {
+            it.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            it.setGravity(Gravity.BOTTOM)
+            it.setWindowAnimations(R.style.DialogSlideAnimation)
+
+            // Set background to transparent for rounded corners
+            it.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), android.R.color.transparent))
+
+            // Add margin from edges
+            val layoutParams = it.attributes
+            layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
+            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
+            it.attributes = layoutParams
+        }
     }
 
     private fun signOut() {

@@ -32,7 +32,10 @@ class SignUpActivity : AppCompatActivity() {
             val confirmPassword = binding.confirmPasswordInput.text.toString().trim()
 
             if (validateInputs(fullName, email, password, confirmPassword)) {
-                if (prefsHelper.registerUser(email, password)) {
+                // Pass the fullName to registerUser method
+                if (prefsHelper.registerUser(email, password, fullName)) {
+                    // Auto-login the user after successful registration
+                    prefsHelper.loginUser(email, password)
                     showSuccessDialog()
                 } else {
                     Toast.makeText(this, "Email already registered", Toast.LENGTH_SHORT).show()
@@ -66,7 +69,7 @@ class SignUpActivity : AppCompatActivity() {
 
         dialog.findViewById<Button>(R.id.sign_in_button)?.setOnClickListener {
             dialog.dismiss()
-            startActivity(Intent(this, SignInActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
 

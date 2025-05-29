@@ -25,8 +25,15 @@ class PrefsHelper(context: Context) {
         val bookingTime: Long = System.currentTimeMillis()
     )
 
+    // Enum for password update results
+    enum class PasswordUpdateResult {
+        SUCCESS,
+        WRONG_CURRENT_PASSWORD,
+        ERROR
+    }
+
     // Authentication Methods
-    fun registerUser(email: String, password: String): Boolean {
+    fun registerUser(email: String, password: String, fullName: String): Boolean {
         val userData = loadUserData()
         val users = userData.getJSONArray("users")
 
@@ -39,6 +46,7 @@ class PrefsHelper(context: Context) {
         val newUser = JSONObject().apply {
             put("email", email)
             put("password", hashPassword(password))
+            put("fullName", fullName)
             put("isLoggedIn", false)
             put("locations", JSONObject().apply {
                 put("selectedLocationType", "Current")
@@ -52,8 +60,7 @@ class PrefsHelper(context: Context) {
         }
 
         users.put(newUser)
-        saveUserData(userData)
-        return true
+        return saveUserData(userData)
     }
 
     fun loginUser(email: String, password: String): Boolean {
@@ -66,9 +73,10 @@ class PrefsHelper(context: Context) {
                 user.getString("password") == hashPassword(password)) {
 
                 user.put("isLoggedIn", true)
-                saveUserData(userData)
-                sharedPref.edit().putString("CURRENT_USER", email).apply()
-                return true
+                if (saveUserData(userData)) {
+                    sharedPref.edit().putString("CURRENT_USER", email).apply()
+                    return true
+                }
             }
         }
         return false
@@ -92,7 +100,21 @@ class PrefsHelper(context: Context) {
         return sharedPref.getString("CURRENT_USER", null)
     }
 
-    fun logout() {
+    fun getCurrentUserName(): String? {
+        val currentUserEmail = getCurrentUserEmail() ?: return null
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                return user.optString("fullName", null)
+            }
+        }
+        return null
+    }
+
+    fun logout(clearRememberMe: Boolean = false) {
         val currentUserEmail = getCurrentUserEmail() ?: return
         val userData = loadUserData()
         val users = userData.getJSONArray("users")
@@ -107,6 +129,88 @@ class PrefsHelper(context: Context) {
         }
 
         sharedPref.edit().remove("CURRENT_USER").apply()
+
+        if (clearRememberMe) {
+            clearRememberMe()
+        }
+    }
+
+    // Profile Update Methods
+    fun updateUserName(newName: String): Boolean {
+        val currentUserEmail = getCurrentUserEmail() ?: return false
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                user.put("fullName", newName)
+                return saveUserData(userData)
+            }
+        }
+        return false
+    }
+
+    fun updateUserPassword(currentPassword: String, newPassword: String): PasswordUpdateResult {
+        val currentUserEmail = getCurrentUserEmail() ?: return PasswordUpdateResult.ERROR
+        val userData = loadUserData()
+        val users = userData.getJSONArray("users")
+
+        for (i in 0 until users.length()) {
+            val user = users.getJSONObject(i)
+            if (user.getString("email") == currentUserEmail) {
+                // Verify current password
+                val storedPassword = user.getString("password")
+                val hashedCurrentPassword = hashPassword(currentPassword)
+
+                if (storedPassword != hashedCurrentPassword) {
+                    return PasswordUpdateResult.WRONG_CURRENT_PASSWORD
+                }
+
+                // Update password
+                user.put("password", hashPassword(newPassword))
+                return if (saveUserData(userData)) {
+                    PasswordUpdateResult.SUCCESS
+                } else {
+                    PasswordUpdateResult.ERROR
+                }
+            }
+        }
+        return PasswordUpdateResult.ERROR
+    }
+
+    // Remember Me Methods (Secure Version)
+    fun saveRememberMe(email: String) {
+        sharedPref.edit().apply {
+            putBoolean("REMEMBER_ME", true)
+            putString("REMEMBERED_EMAIL", email)
+            apply()
+        }
+    }
+
+    fun clearRememberMe() {
+        sharedPref.edit().apply {
+            remove("REMEMBER_ME")
+            remove("REMEMBERED_EMAIL")
+            apply()
+        }
+    }
+
+    fun shouldRememberUser(): Boolean {
+        return sharedPref.getBoolean("REMEMBER_ME", false)
+    }
+
+    fun getRememberedEmail(): String? {
+        return if (shouldRememberUser()) {
+            sharedPref.getString("REMEMBERED_EMAIL", null)
+        } else {
+            null
+        }
+    }
+
+    // Auto-login check (only if remember me is enabled and user was previously logged in)
+    fun canAutoLogin(): Boolean {
+        return shouldRememberUser() && getCurrentUserEmail() != null && isLoggedIn()
     }
 
     // Location Methods
@@ -335,8 +439,7 @@ class PrefsHelper(context: Context) {
                         booking.getLong("bookingTime") == bookingToCancel.bookingTime) {
 
                         bookings.remove(j)
-                        saveUserData(userData)
-                        return true
+                        return saveUserData(userData)
                     }
                 }
                 break
@@ -421,12 +524,14 @@ class PrefsHelper(context: Context) {
         }
     }
 
-    private fun saveUserData(data: JSONObject) {
-        try {
+    private fun saveUserData(data: JSONObject): Boolean {
+        return try {
             val file = File(context.filesDir, USER_DATA_FILE)
             file.writeText(data.toString())
+            true
         } catch (e: Exception) {
             e.printStackTrace()
+            false
         }
     }
 }
